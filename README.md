@@ -5,6 +5,9 @@ dp-neoden4.ulp - rewrite of dangerous prototypes tm220 ulp (modded by jamz) to w
 
 run ulp from board, load a stack, assign and output.
 
+@notes
+ generates a loadable csv
+ 
 @todo
-   csv export, bug fixing.
+   verify
    
