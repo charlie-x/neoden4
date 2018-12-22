@@ -14,7 +14,7 @@ string VERSION = "1.0i";
 // modify these two variables accordingly
 
 int LinesPerTab = 24;            // limit lines per tab. if lines are more than this make a new tab
-int MAXREEL = 98;                // 16 Reels for tm220a, 24 for tm240 (untested), 98 for Neoden4
+int MAXREEL = 98;                // 16 Reels for tm220a, 24 for tm240 (untested), 98 for Neoden4, 99 is considered unused
 int REELS_PER_PAGE = 14;        // reels shown per page
 
 int tabloop;
@@ -46,7 +46,7 @@ string Text = "<br><br><center><a href='http://dangerousprototypes.com/2013/02/2
               ; // image showed a 404
 
 string Help1 = "<p><strong>Reel Name</strong> - Enter the Your Assigned name to the Reel"
-               "<br><strong>Height</strong> - Enter the Height for the Reel. Valid values are 0.00 to 3.00."
+               "<br><strong>Height</strong> - Enter the Height for the Reel. Valid values are 0.00 to 5.00."
                "<br><strong>Rate</strong> - Enter Feeding Rate. Valid values are 0 to 20."
                "<br><strong>Rotation Correction</strong> - If Parts' placement rotation is off, select rotation value to add. a <strong>180</strong> degree rotation rotates the reel's part by .</p>";
 string Help2 = "<p><strong>NullSpaceLabs.com's Standard Stack</strong> - This button loads the NullSpaceLabs.com' Standard Stack."
@@ -2067,15 +2067,15 @@ if ( project.board ) project.board ( B )
                                         {
                                             switch ( MyLayer ) {
                                                 case 0:
-                                                    dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 3.00 );
+                                                    dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
                                                     break;
 
                                                 case 1:
-                                                    dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 3.00 );
+                                                    dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 5.00 );
                                                     break;
 
                                                 case 2:
-                                                    dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 3.00 );
+                                                    dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 5.00 );
                                                     break;
                                             }
                                         }
@@ -2198,13 +2198,21 @@ if ( project.board ) project.board ( B )
                 int ReelNo_G;
                 printf ( "#Feeder,Feeder ID,Type,Nozzle,X,Y,Angle,Footprint,Value,Pick height,Pick delay,Placement height,Placement delay,Vacuum detection,Vacuum value,Vision alignment,Speed,\n" );
 
-                for ( j = 1; j < MAXREEL + 1; j++ ) {
+                for ( j = 2; j < MAXREEL + 1; j++ ) {
 
-                    int inc = 0;
+                    int id, inc = 0;
                     offsetx = ReelOffSetX[j];
                     offsety = ReelOffSetY[j];
+
+                    if ( offsetx == 0 & offsety == 0 ) { continue; }
+
                     //comment = ReelAlias[j];
                     //printf ( "65535,1,%d,%.2f,%.2f,%s,\n", j, offsetx, offsety, comment );
+
+                    id = 0;
+
+                    // special feeder
+                    if ( j > 48 ) { id = 1; }
 
                     printf (	"stack,%d,%d,%d," +
                                 "%.2f,%.2f,%.2f," +
@@ -2214,7 +2222,7 @@ if ( project.board ) project.board ( B )
                                 "%s,%d,%d,"
                                 "%d,%d,%d,%d,%s,%s,\n",
 
-                                j, 0, ReelHead[j],
+                                j, id, ReelHead[j],
                                 ReelOffSetX[j], ReelOffSetY[j], ReelPickAngle[j],
                                 ReelFootPrint[j], ReelValue [j],
 
@@ -2392,26 +2400,17 @@ if ( project.board ) project.board ( B )
                             }
                         }
 
-                        real PartsRotation = E.angle + ( RotationOffsetSelected[stack + 1] * 90 );
+//						real PartsRotation = E.angle + (RotationOffsetSelected[stack + 1] * 90);
+                        real PartsRotation = E.angle ;
 
-                        if ( PartsRotation > 360 ) {
-                            PartsRotation = PartsRotation - 360;
+                        if ( E.angle <= 180 ) {
+                            angle = E.angle;
                         }
 
-                        if ( PartsRotation >= 0 && PartsRotation < 91 )
-                        { angle = -180 + ( 90 - PartsRotation ); }
+                        else {
+                            angle = E.angle - 360;
+                        }
 
-                        else
-                            if ( PartsRotation > 90 && PartsRotation < 181 )
-                            { angle = 90 + ( 180 - PartsRotation ); }
-
-                            else
-                                if ( PartsRotation > 180 && PartsRotation < 271 )
-                                { angle = 0 + ( 270 - PartsRotation ); }
-
-                                else
-                                    if ( PartsRotation > 270 && PartsRotation < 361 )
-                                    { angle = -90 + ( 360 - PartsRotation ); }
 
                         if ( debug == 2 ) {
                             if ( RotationOffsetSelected[stack + 1] != 0 ) {
