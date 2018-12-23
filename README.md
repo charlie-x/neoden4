@@ -23,7 +23,7 @@ press "Change to current position" and the PNP will go to the eagle coords of th
 
 then  pick the actual location of the fiducial where it physically is on the machine and click save
 
-the pnp  will tries to find the second mark,it should fail again, say yes to find it. search for your second fiducial mark, then click save. (agian if you get an out of bounds error, read the note above about where to place the eagle file)
+the pnp  will tries to find the second mark,it should fail again, say yes to find it. search for your second fiducial mark, then click save. (again if you get an out of bounds error, read the note above about where to place the eagle file)
 
 the pnp software should now update all your components to the correct place
 
