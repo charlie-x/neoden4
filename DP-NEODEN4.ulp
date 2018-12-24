@@ -7,7 +7,7 @@
 "1.0i\n"
 // -----------------------
 int debug = 0;                   // set to one for debug: show variables 2 for more
-string VERSION = "1.0h";
+string VERSION = "1.0i";
 
 //------------------------------------Variables ---------------------------------------------------//
 
@@ -53,12 +53,12 @@ string Text = "<br><br><center><a href='http://dangerousprototypes.com/2013/02/2
 
               ; // image showed a 404
 
-string Help1 = "<p><strong>Reel Name</strong> - Enter the Your Assigned name to the Reel"
+string Help1 = "<p><strong>Reel Name</strong> - Enter the Your Assigned name to the Reel, <strong>Reel Footprint</strong> - Footprint of part"
                "<br><strong>Height</strong> - Enter the Height for the Reel. Valid values are 0.00 to 5.00."
-               "<br><strong>Rate</strong> - Enter Feeding Rate. Valid values are 0 to 20."
+               "<br><strong>Feeding Rate</strong> - Enter Feeding Rate. Valid values are 0 to 20."
                "<br><strong>Rotation Correction</strong> - If Parts' placement rotation is off, select rotation value to add. a <strong>180</strong> degree rotation rotates the reel's part by .</p>";
-string Help2 = "<p><strong>NullSpaceLabs.com's Standard Stack</strong> - This button loads the NullSpaceLabs.com' Standard Stack."
-               "<br><strong>Accept</strong> - Accept the displayed values. "
+string Help2 = "<p><strong>NullSpaceLabs.com's Standard Stack</strong> - This button loads the NullSpaceLabs.com' Standard Stack><BR><strong>Load User's Standard Stack</strong> - Load a predefined stack <strong>Save User's Standard Stack</strong> - Save a stack for loading later<BR>"
+               "<br><strong>Accept</strong> - Accept the displayed values. <strong>Cancel</strong> - Reject the changed values. "
                "<br>If there are reel assignments under the tabs<strong> PCB Top</strong> and<strong> PCB Bottom</strong>, it will be updated, as well as the values  in <strong>Height</strong> and <strong>Rate</strong>.</p>";
 
 
