@@ -35,6 +35,7 @@ then update the left bottom position XY to the newly updated first component XY 
 check everything :)
 
 video version of the text is here https://youtu.be/oF4B8zPS2p8
+[![DP-NEODEN4 walkthru](https://img.youtube.com/vi/oF4B8zPS2p8/0.jpg)](https://www.youtube.com/watch?v=oF4B8zPS2p8)
 
 @notes
  generates a loadable csv
