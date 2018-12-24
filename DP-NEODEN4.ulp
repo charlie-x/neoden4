@@ -2323,9 +2323,9 @@ if ( project.board ) project.board ( B )
 
                     id = 0;
 
-                    // special feeder
+                    // special feeder(this crashed older versions of neoden software, have to look into
                     if ( j > 48 ) {
-                        id = 1;
+                        id = 0;
                     }
 
                     // calculate an overide move speed
