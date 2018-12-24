@@ -37,6 +37,14 @@ int line = 1;
 
 int Selected = 0;
 
+// amount to offset the board by
+real board_offset_x = 0;
+real board_offset_y = 0;
+
+// override move speed
+int board_move_override = 100;
+
+
 int i, j, k, l, m, n = 0;       //general purpose iteration/index variable
 // --------------------------------------------Display clickable Picture, linked to DP ------------------------------------------
 string Text = "<br><br><center><a href='http://dangerousprototypes.com/2013/02/21/workshop-video-56-tm220a-table-top-pick-and-place-overview/'>Dangerous Prototypes Original Post</A><BR>"
@@ -1569,6 +1577,33 @@ if ( project.board ) project.board ( B )
         }
     }
 
+    // store config settings
+    string paramsFilename;
+
+    paramsFilename = workdir + SourceFname + ".cfg";
+
+    // load config parameters
+    if ( filesize ( paramsFilename ) > 0 ) {
+        string lines[];
+        int nLines = fileread ( lines, paramsFilename ); // returns # of lines read
+
+        for ( i = 0; i < nLines; i++ ) {
+            string a[];    // use for spliting the line
+
+            n = strsplit ( a, lines[i], ',' );
+
+            board_offset_x = strtod ( alltrim ( a[0] ) );
+            board_offset_y = strtod ( alltrim ( a[1] ) );
+            board_move_override = strtod ( alltrim ( a[2] ) );
+        }
+
+    } else {
+        board_offset_x = 0;
+        board_offset_y = 0;
+        board_move_override = 100;
+
+    }
+
     // load values from stack file
 
     if ( filesize ( StackFname ) > 0 ) {
@@ -1641,12 +1676,6 @@ if ( project.board ) project.board ( B )
 
     Result = 5;
 
-    // amount to offset the board by
-    real board_offset_x = 0;
-    real board_offset_y = 0;
-
-    // override move speed
-    int board_move_override = 100;
 
     while ( Result == 5 )
         Result = dlgDialog ( "DP Neoden 4 Pick and Place " ) {
@@ -1943,6 +1972,7 @@ if ( project.board ) project.board ( B )
 
                 dlgTabPage ( pcb_layer ) {
 
+                    dlgSpacing ( 0 );
 
                     // make a combo name of name + footprint to make reel selection easier
                     for ( j = 0; j <= MAXREEL; j++ ) {
@@ -2045,7 +2075,6 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        // dlgStretch ( 1 );
                                     }
                                 }
 
@@ -2146,6 +2175,9 @@ if ( project.board ) project.board ( B )
 
                                 dlgCell ( cellx, celly++ ) {
                                     dlgVBoxLayout {
+                                        dlgSpacing ( 0 );
+                                        dlgStretch ( 0 );
+
                                         if ( cellx == 0 )
                                         {
                                             dlgLabel ( "Nozzle" );
@@ -2174,6 +2206,8 @@ if ( project.board ) project.board ( B )
                                 }
                                 dlgCell ( cellx, celly++ ) {
                                     dlgVBoxLayout {
+                                        dlgSpacing ( 0 );
+
                                         if ( cellx == 0 )
                                         {
                                             dlgLabel ( "Height" );
@@ -2181,6 +2215,8 @@ if ( project.board ) project.board ( B )
 
                                         else
                                         {
+                                            dlgSpacing ( 0 );
+
                                             switch ( MyLayer ) {
                                                 case 0:
                                                     //dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
@@ -2199,12 +2235,14 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        // dlgStretch ( 1 );
+                                        dlgStretch ( 1 );
                                     }
                                 }
 
                                 dlgCell ( cellx, celly++ ) {
                                     dlgVBoxLayout {
+                                        dlgSpacing ( 0 );
+
                                         if ( cellx == 0 )
                                         {
                                             dlgLabel ( "Skip" );
@@ -2212,6 +2250,8 @@ if ( project.board ) project.board ( B )
 
                                         else
                                         {
+
+
                                             switch ( MyLayer ) {
                                                 case 0:
                                                     dlgSpinBox ( CT_Skip[cellx - 1 + TopAddLine[pagex]], 0, 1 );
@@ -2227,7 +2267,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        //dlgStretch ( 1 );
+                                        dlgStretch ( 1 );
                                     }
                                 }
 
@@ -2281,6 +2321,17 @@ if ( project.board ) project.board ( B )
 
 
         fileerror();
+
+        // store config settings
+        string paramsFilename;
+
+        paramsFilename = workdir + SourceFname + ".cfg";
+
+        if ( paramsFilename != "" ) {
+            output ( paramsFilename ) {
+                printf ( "%.3f,%.3f,%d\n", board_offset_x, board_offset_y, board_move_override );
+            }
+        }
 
         string csvfilename;
 
