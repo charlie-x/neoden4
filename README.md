@@ -42,8 +42,11 @@ video version of the text is here https://youtu.be/oF4B8zPS2p8
 
 @notes
  generates a loadable csv, tested on machine
+ 
  user stacks work correctly
+ 
  the special feeder flag i had as > 48 index = 1 but that crashed 4.1.2 B3 so they are always set to 0 currently
  
+ 
 @todo
- bug test/
+ bug test
