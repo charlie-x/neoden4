@@ -431,28 +431,28 @@ int skip_part ( UL_ELEMENT E )
 // get X pos in mm of first part that will be output
 real get_first_x()
 {
-	board(B) {
-	  B.elements(E) {
-	  // try to get the first part to be placed
-	  if( skip_part(E) == 1 )
-		return u2mm (E.x) ;
-	  }
-	}
-	return -1;
-} 
+    board ( B ) {
+        B.elements ( E ) {
+            // try to get the first part to be placed
+            if ( skip_part ( E ) == 1 )
+            { return u2mm ( E.x ) ; }
+        }
+    }
+    return -1;
+}
 
 // get Y pos in mm of first part that will be output
 real get_first_y()
 {
-	board(B) {
-	  B.elements(E) {
-	  // try to get the first part to be placed
-	  if( skip_part(E) == 1 )
-		return u2mm (E.y) ;
-	  }
-	}
-	return -1;
-} 
+    board ( B ) {
+        B.elements ( E ) {
+            // try to get the first part to be placed
+            if ( skip_part ( E ) == 1 )
+            { return u2mm ( E.y ) ; }
+        }
+    }
+    return -1;
+}
 
 //"stack,2,0,1,409.87,101.73,90.00,0805,0805/2.2nF,0.50,0,0.50,0,No,-40,1,100,4,50,80,No,No,-40,-40,-40,-40,",
 //[REEL]|1|0805/2.2nF|0805|1|409.87|101.73|90.00|0805|0.50|0|0.50|0|NO|-40|1|100|4|50|80|NO|NO
@@ -1586,6 +1586,8 @@ if ( project.board ) project.board ( B )
     }
 
     Result = 5;
+    real board_offset_x = 0;
+    real board_offset_y = 0;
 
     while ( Result == 5 )
         Result = dlgDialog ( "DP Neoden 4 Pick and Place " ) {
@@ -1652,6 +1654,19 @@ if ( project.board ) project.board ( B )
                 // dlgStretch(1);
 
                 // }
+
+
+                dlgHBoxLayout{
+                    dlgLabel ( "Set a board offset (moves position of all components by this amount in mm)                     " );
+                    dlgStretch ( 1 );
+                    dlgLabel ( "X" );
+                    dlgRealEdit ( board_offset_x );
+                    dlgLabel ( "mm" );
+                    dlgStretch ( 1 );
+                    dlgLabel ( "Y" );
+                    dlgRealEdit ( board_offset_y );
+                    dlgLabel ( "mm" );
+                }
                 dlgHBoxLayout {
                     dlgLabel ( "Enter CSV Export File (TOP):" );
                     csvnametop = workdir + SourceFname + "_Top.csv";
@@ -2259,34 +2274,33 @@ if ( project.board ) project.board ( B )
                 }
 
 
-				// find first component XY
-				real first_x = get_first_x();
-				real first_y = get_first_y();
+                // find first component XY, add adjusted board offset if any
+                real first_x = get_first_x() + board_offset_x;
+                real first_y = get_first_y() + board_offset_y;
 
                 // suss
                 //printf ( "pcb,Machine,Trace,100,100,350,150,Front,10,10,0,\nmark, Whole, Auto,\ntest, No, \nmirror_create,1,1,0,0,0,0,0,0,0,\n" );
-                
-                // pcb, manual feed, mag fixtured, something,something, detect x, detect y, 
-                printf ("pcb,Manual,Lock,100,100,350,150,Front,10,10,0,\n");
-                
+
+                // pcb, manual feed, mag fixtured, something,something, detect x, detect y,
+                printf ( "pcb,Manual,Lock,100,100,350,150,Front,10,10,0,\n" );
+
                 //fiducial settings
                 //  markext, index, min,max,light source 1 =inner  (outer ) , brightness 0 = auto  (25/60/75/100/150/200/250/300)
-                printf("markext,0,0.8,3,1,0,\n");
-                printf("markext,1,0.8,3,1,0,\n");
-                printf("test,No,\n");
-				
-				// panel
+                printf ( "markext,0,0.8,3,1,0,\n" );
+                printf ( "markext,1,0.8,3,1,0,\n" );
+                printf ( "test,No,\n" );
+
                 //  rows, cols, left bottom(x.y),......
-                printf("mirror_create,1,1,%.3f,%.3f,0,0,0,0,0,\n", first_x, first_y);
-                
-				// list of fiducials
-                printf("mark,Whole,Auto,236.463,203.446,219.258,168.131,\n");
-                
+                printf ( "mirror_create,1,1,%.3f,%.3f,0,0,0,0,0,\n", first_x, first_y );
+
+                // list of fiducials
+                printf ( "mark,Whole,Auto,236.463,203.446,219.258,168.131,\n" );
+
                 // panel list
-                
+
                 // x,y, rotation
-                printf("mirror,%.3f,%.3f,0,No,\n",first_x,first_y);
-                
+                printf ( "mirror,%.3f,%.3f,0,No,\n", first_x, first_y );
+
                 if ( ( nBoardsinX != 0 ) || ( nBoardsinY != 0 ) ) {
                     // todo: Multiple boards
 
@@ -2442,7 +2456,7 @@ if ( project.board ) project.board ( B )
                                 i_got_it = 0;
                                 break;
                             }
-                          }
+                        }
 
 //						real PartsRotation = E.angle + (RotationOffsetSelected[stack + 1] * 90);
                         real PartsRotation = E.angle ;
@@ -2465,7 +2479,9 @@ if ( project.board ) project.board ( B )
                         if ( stack != 99 ) {
                             printf ( "comp,%d,%d,%s,%s,%s,%.2f,%.2f,%.0f,%s,\n",
                                      stack + 1, head, E.name, E.value, E.package.name,
-                                     u2mm ( ( xmin + xmax ) / 2 ), u2mm ( ( ymin + ymax ) / 2 ), angle,
+                                     u2mm ( ( xmin + xmax ) / 2 ) + board_offset_x,
+                                     u2mm ( ( ymin + ymax ) / 2 ) + board_offset_y,
+                                     angle,
                                      skip ? "Yes" : "No"
                                    );
                         }
@@ -2473,7 +2489,7 @@ if ( project.board ) project.board ( B )
                         else {
                             // no assigned stack
                             if ( debug == 1 ) {
-                                printf ( "%d,%d,,%.2f,%.2f,%.0f,%.2f,%d,%s,%s-%s\n", line++, head, u2mm ( ( xmin + xmax ) / 2 ), u2mm ( ( ymin + ymax ) / 2 ), angle, partsheight, skip, E.name, E.value, E.package.name );
+                                printf ( "%d,%d,,%.2f,%.2f,%.0f,%.2f,%d,%s,%s-%s\n", line++, head, u2mm ( ( xmin + xmax ) / 2 ) + board_offset_x, u2mm ( ( ymin + ymax ) / 2 ) + board_offset_y, angle, partsheight, skip, E.name, E.value, E.package.name );
                             }
                         }
                     }
@@ -2481,6 +2497,7 @@ if ( project.board ) project.board ( B )
             }
         }
 
+        // @todo check/fix this
         output ( StackFname ) {
 
             for ( j = 0; j < TopCounter; j++ ) {
@@ -2510,7 +2527,7 @@ if ( project.board ) project.board ( B )
         }
 
         else {
-			// seems unecessary
+            // seems unecessary
             // dlgMessageBox ( ";CSV and PnP file export Success: \n " + csvnametop + "\n" + csvnamebottom + "\n" + StackFname + "\n", "&OK" );
         }
 
