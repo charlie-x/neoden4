@@ -42,7 +42,7 @@ video version of the text is here https://youtu.be/oF4B8zPS2p8
 
 @notes
  generates a loadable csv, tested on machine
+ user stacks work correctly
  
 @todo
-   fix USS
-   
+ bug test/   
