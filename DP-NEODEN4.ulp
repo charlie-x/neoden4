@@ -6,8 +6,8 @@
 "Neoden 4 charliex@nullspacelabs.com\n"
 "1.0i\n"
 // -----------------------
-int debug = 0;                   // set to one for debug: show variables
-string VERSION = "1.0j";
+int debug = 0;                   // set to one for debug: show variables 2 for more
+string VERSION = "1.0h";
 
 //------------------------------------Variables ---------------------------------------------------//
 
@@ -90,7 +90,9 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
 // you  can copy and paste a neoden4 stack in here, just add a " at the start and ", at the end, on the last line at the end use " instead of ",
 // this will work with either , or | as a delimiter
 
+// 1..98
 string NSL_partList[] = {
+    //stack 1,isn't here, starts from 1.
     "stack,2,0,1,409.87,101.73,90.00,0805,0805/2.2nF,0.50,0,0.50,0,No,-40,1,100,4,50,80,No,No,-40,-40,-40,-40,",
     "stack,3,0,1,409.85,115.04,90.00,,0805/10uF,0.50,0,1.00,0,No,-40,1,100,4,50,80,No,No,-40,-40,-40,-40,",
     "stack,4,0,1,409.95,128.58,90.00,0805,0805/1.0uF,0.50,0,1.00,0,No,-40,1,100,4,50,80,No,No,-40,-40,-40,-40,",
@@ -135,8 +137,8 @@ string NSL_partList[] = {
     "stack,94,1,4,146.93,227.88,0.00,NULLSPACE_SPARKFUN_TACTILE_SWITCH_SMD,CHIPLED_1206/,1.00,0,1.50,1,No,-40,1,50,1,1,146.93,227.88,1,1,No,No,-40,-40,-40,-40,",
     "stack,95,1,1,134.39,227.57,0.00,,24X16_RGB_LED5MM_RGB_EDGE/WS2812B,0.50,0,0.00,0,No,-40,1,100,1,1,134.39,227.57,1,1,No,No,-40,-40,-40,-40,",
     "stack,96,1,4,120.06,227.38,0.00,EVQ-Q2B,QFN20/FT231XQ,0.70,0,2.70,0,Yes,-40,1,100,1,1,120.06,227.38,1,1,No,No,-40,-40,-40,-40,",
-    "stack,98,1,1,92.27,226.88,0.00,,0805/couple pf -DNP,-1.00,0,0.00,0,No,-40,1,100,1,1,92.27,226.88,1,1,No,No,-40,-40,-40,-40,",
-    "stack,97,1,4,107.73,227.09,0.00,EVQ-Q2A,FIDUCIAL_1MM/FIDUCIAL"",0.70,0,2.70,0,Yes,-40,1,100,1,1,107.73,227.09,1,1,No,No,-40,-40,-40,-40,"
+    "stack,97,1,4,107.73,227.09,0.00,EVQ-Q2A,FIDUCIAL_1MM/FIDUCIAL"",0.70,0,2.70,0,Yes,-40,1,100,1,1,107.73,227.09,1,1,No,No,-40,-40,-40,-40,",
+    "stack,98,1,1,92.27,226.88,0.00,,0805/couple pf -DNP,-1.00,0,0.00,0,No,-40,1,100,1,1,92.27,226.88,1,1,No,No,-40,-40,-40,-40,"
 };
 
 int  DP_stack_Loaded = 0;    // flag 1 if dp stack is loaded
@@ -290,9 +292,11 @@ string partsX;
 string partsY;
 string partsRotation;
 string layer;
-string Reel[];
-string ReelAlias[];     // user defined names for reels
-string ReelValue[];     // user defined names for reels
+string Reel[];    // user defined names for reels
+string ReelNum[];		// string version of reel index
+
+//string ReelAlias[];     // user defined names for reels
+//string ReelValue[];     // user defined names for reels
 
 // Feeder Basic Information
 int ReelHead[];       // Nozzle used for this reel 1,2,3,4
@@ -447,12 +451,63 @@ real get_first_y()
     board ( B ) {
         B.elements ( E ) {
             // try to get the first part to be placed
-            if ( skip_part ( E ) == 1 )
-            { return u2mm ( E.y ) ; }
+            if ( skip_part ( E ) == 1 ) {
+                return u2mm ( E.y ) ;
+            }
         }
     }
     return -1;
 }
+
+int is_fiducial ( UL_ELEMENT E )
+{
+    // does name contain FID
+    if ( strstr ( E.value, "FID" ) > 0 ) {
+        return 1;
+    }
+
+    // does value contain FID
+    if ( strstr ( E.name, "FID" ) > 0  ) {
+        return 1;
+    }
+
+    // we don't think its a fiducial
+    return 0;
+}
+
+// number of fiducials found
+int g_fiducial_count = 0;
+// XY of fiducials found
+real g_fiducial_x[];
+real g_fiducial_y[];
+
+// return number of fiducials found and add them to a list
+int scan_for_fiducials()
+{
+
+    int fiducial_count = 0;
+
+    board ( B ) {
+        B.elements ( E ) {
+            // find a fiducial
+            if ( is_fiducial ( E ) == 1 ) {
+
+                // remember it
+                g_fiducial_x[fiducial_count] = u2mm ( E.x );
+                g_fiducial_y[fiducial_count] = u2mm ( E.y );
+
+                fiducial_count++;
+            }
+
+        }
+    }
+    // store it for later
+    g_fiducial_count = fiducial_count;
+
+    // send back count
+    return fiducial_count;
+}
+
 
 //"stack,2,0,1,409.87,101.73,90.00,0805,0805/2.2nF,0.50,0,0.50,0,No,-40,1,100,4,50,80,No,No,-40,-40,-40,-40,",
 //[REEL]|1|0805/2.2nF|0805|1|409.87|101.73|90.00|0805|0.50|0|0.50|0|NO|-40|1|100|4|50|80|NO|NO
@@ -470,8 +525,7 @@ void write_reel_line ( int j )
               ReelOffSetY[j],						//%.2f 5
               ReelPickAngle[j],						//%.2f 6
               ReelFootPrint[j],						//%s 7
-              ReelAlias[j],							//%s 8
-//              ReelValue[j],							//%s 8
+              Reel[j],								//%s 8
               ReelHeight[j],						//%.2f
               ReelPickDelay[j],						//%d
               ReelPlaceHeight[j],					//%.2f
@@ -491,6 +545,7 @@ void write_reel_line ( int j )
 }
 
 // parses a neoden 4 style string for a REEL
+// reel index stored in file is +1 of actual index.
 void parse_reel_line ( string reelString )
 {
     int i;
@@ -505,10 +560,10 @@ void parse_reel_line ( string reelString )
 
     }
 
-    // get reel index
-    i = strtol ( alltrim ( a[1] ) );
+    // get reel index, USS  starts at 1
+    i = strtol ( alltrim ( a[1] ) ) ;
 
-    if ( i < MAXREEL ) {
+    if ( i <= MAXREEL ) {
 
         // a[0] = [REEL] or stack
         // a[1] = feeder index
@@ -527,13 +582,13 @@ void parse_reel_line ( string reelString )
         // Footprint
         ReelFootPrint[i] = ( alltrim ( a[7] ) );
         // FootPrint
-        ReelValue[i] = alltrim ( a[7] );
+        //ReelValue[i] = alltrim ( a[7] );
 
         // package and value is combined in the neoden stack
         if ( strlen ( alltrim ( a[8] ) ) ) {
             // Value
-            ReelAlias[i] = alltrim ( a[8] );
-            Reel[i] = ReelAlias[i];
+            Reel[i] = alltrim ( a[8] );
+
         }
 
 
@@ -608,13 +663,9 @@ void Load_Stack ( string who )
     // fill some defaults
     for ( j = 0; j < MAXREEL; j++ ) {
         Reel[j] = "Reel " + Num2Str ( j  );
-        ReelAlias[j] = "Reel " + Num2Str ( j );
     }
 
     for ( j = 0; j < MAXREEL; j++ ) {
-
-        //  Reel[i+1]="Reel# "+Num2Str(i);     // remember to subtract 1, Reel[0]="--------";
-        //  ReelAlias[i+1]=Reel[i+1];
 
 //idstac ID TY  NZ  X       Y       PAng   Foot  Val              PHGT  PID PHT   PLD VD  VCV VA  SPD  FRT FST PST SKP SZ
 ///       0  1   2    3        4     5      6         7            8     9   10    11 12  13  14   15   16  17  18 19  20
@@ -638,27 +689,9 @@ void Load_Stack ( string who )
             int nLines = fileread ( lines, UserStackFname ); // returns # of lines read
 
             for ( i = 0; i < nLines; i++ ) {
-                string a[];    // use for spliting the line
-                n = strsplit ( a, lines[i], '|' );
 
-                if ( alltrim ( a[0] ) == "[REEL]" ) {
-                    if ( tr == strtol ( alltrim ( a[1] ) ) ) {
-                        ReelAlias[tr + 1] = alltrim ( a[2] );
-                        ReelHeight[tr + 1] = strtod ( alltrim ( a[3] ) );
-                        ReelRate[tr + 1] = strtol ( alltrim ( a[4] ) );
-                        RotationOffsetSelected[tr + 1] = strtod ( alltrim ( a[5] ) );
-                        ReelOffSetX[tr + 1] = strtod ( alltrim ( a[6] ) );
-                        ReelOffSetY[tr + 1] = strtod ( alltrim ( a[7] ) );
-                        tr++;
-                    }
+                parse_reel_line ( lines[i] );
 
-                }
-
-            }
-
-            // Load ReelAlias Reel[]
-            for ( j = 0; j < MAXREEL; j++ ) {
-                Reel[j + 1] = ReelAlias[j + 1];
             }
 
         }
@@ -756,7 +789,7 @@ string Group_Parts ( string Enamex )
 
 void ReelPage ( int reeloffset )
 {
-
+    dlgRedisplay();
     board ( B ) {
         // 1. load default values if new
         // 2. Load save values if settings file exist
@@ -821,7 +854,7 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
-                                    dlgStringEdit ( ReelAlias[reelNumber] );
+                                    dlgStringEdit ( Reel[reelNumber] );
 
 
                                 }
@@ -830,6 +863,26 @@ void ReelPage ( int reeloffset )
                             }
 
                         }
+                        //ReelFootPrint
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Reel Footprint" );
+                                }
+
+                                else
+                                {
+                                    dlgStringEdit ( ReelFootPrint[reelNumber] );
+
+
+                                }
+
+                                // dlgStretch ( 1 );
+                            }
+
+                        }
+
                         dlgCell ( cellx, celly++ ) {
                             dlgVBoxLayout {
                                 if ( cellx == 0 )
@@ -1116,9 +1169,7 @@ void ReelPage ( int reeloffset )
                                 output ( UserStackFname ) {
                                     for ( j = 0; j < MAXREEL; j++ ) {
 
-                                        printf ( "[REEL]|%d|%s|%.2f|%d|%d|%.2f|%.2f\n",
-                                                 j, ReelAlias[j + 1], ReelHeight[j + 1], ReelRate[j + 1], RotationOffsetSelected[j + 1],
-                                                 ReelOffSetX[j + 1], ReelOffSetY[j + 1] );
+                                        write_reel_line ( j + 1 );
                                     }
 
                                 }
@@ -1139,7 +1190,6 @@ void ReelPage ( int reeloffset )
                         dlgPushButton ( "+&Accept" ) {
                             for ( i = 1; i <= REELS_PER_PAGE; i++ ) {
                                 // Reel[0]="--------";
-                                Reel[i] = ReelAlias[i];
 
                                 for ( j = 0; j < TopCounter; j++ ) {
                                     if ( CT_ReelNo[j] == i ) {
@@ -1218,19 +1268,21 @@ void ReelPage ( int reeloffset )
 
 // Initialize variables
 Reel[0] = "--------";
-ReelAlias[0] = Reel[0];
-ReelValue[0] = Reel[0];
+//ReelValue[0] = Reel[0];
+ReelNum[0] = "--";
 
-for ( i = 0; i <= MAXREEL ; i++ )
+for ( i = 0; i < MAXREEL ; i++ )
 {
     g_Efeeder_Top[i] = 99;
     g_Efeeder_Bottom[i] = 99;
     comboSelected_Top[i] = 0;
     comboSelected_Bottom[i] = 0;
     RotationOffsetSelected[i] = 0;
-    Reel[i + 1] = "Reel# " + Num2Str ( i );
-    ReelAlias[i + 1] = Reel[i + 1];
-    ReelValue[i + 1] = Reel[i + 1];
+    Reel[i + 1] = "Reel# " + Num2Str ( i + 1 );
+    // to help with the combox box issue
+    ReelNum[i + 1] = "" + Num2Str ( i + 1 );
+
+    //ReelValue[i + 1] = Reel[i + 1];
     g_Head_Top[i] = 1;
     g_Head_Bottom[i] = 1;
     g_Eheight_Top[i] = 0.00;
@@ -1575,10 +1627,7 @@ if ( project.board ) project.board ( B )
                 tr++;
             }
 
-            // Load ReelAlias Reel[]
-            for ( j = 0; j < MAXREEL; j++ ) {
-                Reel[j + 1] = ReelAlias[j + 1];
-            }
+
         }
 
         //dlgMessageBox("!Final: comboSelected_Bottom[0]= "+Num2Str(comboSelected_Bottom[0])+"\n","&OK");
@@ -1874,6 +1923,7 @@ if ( project.board ) project.board ( B )
                 }
 
                 dlgTabPage ( pcb_layer ) {
+
                     dlgRedisplay();
 
                     dlgVBoxLayout {
@@ -2018,15 +2068,15 @@ if ( project.board ) project.board ( B )
                                         {
                                             switch ( MyLayer ) {
                                                 case 0:
-                                                    dlgComboBox ( Reel, CT_ReelNo[cellx - 1 + TopAddLine[pagex]] );
+                                                    dlgComboBox ( Reel, CT_ReelNo[cellx - 1 + TopAddLine[pagex]] ) dlgRedisplay();
                                                     break;
 
                                                 case 1:
-                                                    dlgComboBox ( Reel, CB_ReelNo[cellx - 1 + BottomAddLine[pagey]] );
+                                                    dlgComboBox ( Reel, CB_ReelNo[cellx - 1 + BottomAddLine[pagey]] ) dlgRedisplay();
                                                     break;
 
                                                 case 2:
-                                                    dlgComboBox ( Reel, CM_ReelNo[cellx - 1 + MidAddLine[pagez]] );
+                                                    dlgComboBox ( Reel, CM_ReelNo[cellx - 1 + MidAddLine[pagez]] ) dlgRedisplay();
                                                     break;
                                             }
                                         }
@@ -2037,7 +2087,8 @@ if ( project.board ) project.board ( B )
 
                                 }
 
-                                //ReelValue
+                                //ReelNumber, can't find a way to make this update after Reel Assignment is changed. it only updates next load
+                                // changing it to a dlgSpinBox makes Reel Assignment change, but now not the other way around!
                                 dlgCell ( cellx, celly++ ) {
                                     dlgVBoxLayout {
                                         if ( cellx == 0 )
@@ -2050,20 +2101,21 @@ if ( project.board ) project.board ( B )
                                             switch ( MyLayer ) {
                                                 case 0:
 
-                                                    dlgLabel ( Num2Str ( CT_ReelNo[cellx - 1 + TopAddLine[pagex]] ) );
+                                                    dlgComboBox ( ReelNum, CT_ReelNo[cellx - 1 + TopAddLine[pagex]] )  dlgRedisplay();
                                                     break;
 
                                                 case 1:
-                                                    dlgLabel ( Num2Str ( CB_ReelNo[cellx - 1 + BottomAddLine[pagey]] ) );
+                                                    dlgComboBox ( ReelNum, CB_ReelNo[cellx - 1 + BottomAddLine[pagey]] ) dlgRedisplay();
                                                     break;
 
                                                 case 2:
-                                                    dlgLabel ( Num2Str ( CM_ReelNo[cellx - 1 + MidAddLine[pagez]] ) );
+                                                    dlgComboBox ( ReelNum, CM_ReelNo[cellx - 1 + MidAddLine[pagez]] )  dlgRedisplay();
                                                     break;
                                             }
                                         }
 
                                         dlgStretch ( 1 );
+
                                     }
 
                                 }
@@ -2164,15 +2216,13 @@ if ( project.board ) project.board ( B )
                             }
                         }
                         dlgStretch ( 1 );
+
+
                     }
                     dlgVBoxLayout {
                         dlgStretch ( 1 );
                     }
-
-
-
-
-
+                    dlgStretch ( 1 );
                 }
 
                 switch ( MyLayer ) {
@@ -2239,21 +2289,28 @@ if ( project.board ) project.board ( B )
                 int ReelNo_G;
                 printf ( "#Feeder,Feeder ID,Type,Nozzle,X,Y,Angle,Footprint,Value,Pick height,Pick delay,Placement height,Placement delay,Vacuum detection,Vacuum value,Vision alignment,Speed,\n" );
 
-                for ( j = 2; j < MAXREEL + 1; j++ ) {
+                for ( j = 1; j <= MAXREEL ; j++ ) {
 
                     int id, inc = 0;
+
                     offsetx = ReelOffSetX[j];
                     offsety = ReelOffSetY[j];
 
-                    if ( offsetx == 0 & offsety == 0 ) { continue; }
+                    // will skip reels with no offset.
+                    // lets keep them, if we're using phantom reels
+                    // if ( offsetx == 0 & offsety == 0 ) {
+                    //     continue;
+                    // }
 
-                    //comment = ReelAlias[j];
+                    //comment = Reel[j];
                     //printf ( "65535,1,%d,%.2f,%.2f,%s,\n", j, offsetx, offsety, comment );
 
                     id = 0;
 
                     // special feeder
-                    if ( j > 48 ) { id = 1; }
+                    if ( j > 48 ) {
+                        id = 1;
+                    }
 
                     printf (	"stack,%d,%d,%d," +
                                 "%.2f,%.2f,%.2f," +
@@ -2265,7 +2322,7 @@ if ( project.board ) project.board ( B )
 
                                 j, id, ReelHead[j],
                                 ReelOffSetX[j], ReelOffSetY[j], ReelPickAngle[j],
-                                ReelFootPrint[j], ReelValue [j],
+                                ReelFootPrint[j], Reel [j],
 
                                 ReelHeight[j], ReelPickDelay[j], ReelPlaceHeight[j], ReelPlaceDelay[j],
                                 ReelVacuumDetection[j] ? "Yes" : "No",	ReelVacuumValue[j], ReelVisionAlignment[j],
@@ -2274,27 +2331,49 @@ if ( project.board ) project.board ( B )
                 }
 
 
-                // find first component XY, add adjusted board offset if any
+                // find first component XY, add adjusted board offset if any, we scan the list of components since this needs to be known before listing the components out
                 real first_x = get_first_x() + board_offset_x;
                 real first_y = get_first_y() + board_offset_y;
-
-                // suss
-                //printf ( "pcb,Machine,Trace,100,100,350,150,Front,10,10,0,\nmark, Whole, Auto,\ntest, No, \nmirror_create,1,1,0,0,0,0,0,0,0,\n" );
 
                 // pcb, manual feed, mag fixtured, something,something, detect x, detect y,
                 printf ( "pcb,Manual,Lock,100,100,350,150,Front,10,10,0,\n" );
 
                 //fiducial settings
-                //  markext, index, min,max,light source 1 =inner  (outer ) , brightness 0 = auto  (25/60/75/100/150/200/250/300)
-                printf ( "markext,0,0.8,3,1,0,\n" );
-                printf ( "markext,1,0.8,3,1,0,\n" );
+
+                // how many were found
+                int number_of_fiducials = scan_for_fiducials();
+
+
                 printf ( "test,No,\n" );
+
+                // are there any fiducials?
+                if ( number_of_fiducials ) {
+
+                    // list of fiducials @todo,scan list of components with FID in the name ?
+                    // mark, Mirror/Whole, Auto/Manual
+                    // Auto/Manual = PCB Mark Settings ( Manual checkbox)
+                    // Mirror/Whole = Panelised or Single
+                    printf ( "mark,Whole,Auto," );
+
+                    for ( int fid = 0; fid < number_of_fiducials; fid++ ) {
+                        printf ( "%.3f,%.3f,", g_fiducial_x[fid] + board_offset_x, g_fiducial_y[fid] + board_offset_y );
+                    }
+
+                    //terminate line
+                    printf ( "\n" );
+
+
+                    // one per fiducial
+                    // markext, index, min,max,light source 1 =inner  (outer ) , brightness 0 = auto  (25/60/75/100/150/200/250/300)
+                    for ( fid = 0; fid < number_of_fiducials; fid++ ) {
+                        printf ( "markext,%d,0.8,3,1,0,\n", fid );
+                    }
+                }
 
                 //  rows, cols, left bottom(x.y),......
                 printf ( "mirror_create,1,1,%.3f,%.3f,0,0,0,0,0,\n", first_x, first_y );
 
-                // list of fiducials
-                printf ( "mark,Whole,Auto,236.463,203.446,219.258,168.131,\n" );
+
 
                 // panel list
 
