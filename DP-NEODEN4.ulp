@@ -1219,6 +1219,10 @@ void ReelPage ( int reeloffset )
                                     }
                                 }
 
+                                // make a combo name of name + footprint to make reel selection easier
+                                for ( j = 0; j <= MAXREEL; j++ ) {
+                                    ReelNameAndFoot[j] = Reel[j] + "/" + ReelFootPrint[j];
+                                }
 
 
                             }
