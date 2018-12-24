@@ -1,7 +1,7 @@
 # neoden4
 place for neoden4 scripts
 
-dp-neoden4.ulp - rewrite of dangerous prototypes tm220 ulp (modded by jamz) to work for the Neoden 4 pick and place.
+dp-neoden4.ulp - rewrite of dangerous prototypes tm220 ulp (modded by jamz and Xinort) to work for the Neoden 4 pick and place.
 
 you have to move your board in eagle to a place where the fiducials in eagle coordinates are mappable in the machines physical space, so no -X,  or -Y all positive, and enough away from 0,0 where the head can physically move. Otherwise it'll cause an error when you try to use the following instructions
 
