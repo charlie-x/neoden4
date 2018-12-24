@@ -293,6 +293,8 @@ string partsY;
 string partsRotation;
 string layer;
 string Reel[];    // user defined names for reels
+string ReelNameAndFoot[];    // auto generated name for reel name and footprint
+
 string ReelNum[];		// string version of reel index
 
 //string ReelAlias[];     // user defined names for reels
@@ -1925,7 +1927,11 @@ if ( project.board ) project.board ( B )
 
                 dlgTabPage ( pcb_layer ) {
 
-                    dlgRedisplay();
+
+                    // make a combo name of name + footprint to make reel selection easier
+                    for ( j = 0; j <= MAXREEL; j++ ) {
+                        ReelNameAndFoot[j] = Reel[j] + "/" + ReelFootPrint[j];
+                    }
 
                     dlgVBoxLayout {
                         dlgGridLayout {
@@ -2069,15 +2075,15 @@ if ( project.board ) project.board ( B )
                                         {
                                             switch ( MyLayer ) {
                                                 case 0:
-                                                    dlgComboBox ( Reel, CT_ReelNo[cellx - 1 + TopAddLine[pagex]] ) dlgRedisplay();
+                                                    dlgComboBox ( ReelNameAndFoot, CT_ReelNo[cellx - 1 + TopAddLine[pagex]] ) dlgRedisplay();
                                                     break;
 
                                                 case 1:
-                                                    dlgComboBox ( Reel, CB_ReelNo[cellx - 1 + BottomAddLine[pagey]] ) dlgRedisplay();
+                                                    dlgComboBox ( ReelNameAndFoot, CB_ReelNo[cellx - 1 + BottomAddLine[pagey]] ) dlgRedisplay();
                                                     break;
 
                                                 case 2:
-                                                    dlgComboBox ( Reel, CM_ReelNo[cellx - 1 + MidAddLine[pagez]] ) dlgRedisplay();
+                                                    dlgComboBox ( ReelNameAndFoot, CM_ReelNo[cellx - 1 + MidAddLine[pagez]] ) dlgRedisplay();
                                                     break;
                                             }
                                         }
