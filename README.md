@@ -3,7 +3,7 @@ place for neoden4 scripts
 
 dp-neoden4.ulp - rewrite of dangerous prototypes tm220 ulp (modded by jamz) to work for the Neoden 4 pick and place.
 
-you have to move your board in eagle to a place where the fiducials in eagle coordinates are mappable in the machines physical space, so no -X,  or -Y all positive, and enough away from 0,0 wherre the head can physically move. Otherwise it'll cause an error when you try to use the following instructions
+you have to move your board in eagle to a place where the fiducials in eagle coordinates are mappable in the machines physical space, so no -X,  or -Y all positive, and enough away from 0,0 where the head can physically move. Otherwise it'll cause an error when you try to use the following instructions
 
 run ulp from board, load or edit the stack, assign and output.
 
@@ -26,6 +26,8 @@ then  pick the actual location of the fiducial where it physically is on the mac
 the pnp  will tries to find the second mark,it should fail again, say yes to find it. search for your second fiducial mark, then click save. (again if you get an out of bounds error, read the note above about where to place the eagle file)
 
 the pnp software should now update all your components to the correct place
+
+then update the left bottom position XY to the newly updated first component XY position and recreate the panel by clicking the panel button. save it, test by single step, or using align.
 
 check everything :)
 
