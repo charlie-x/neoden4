@@ -1761,7 +1761,7 @@ if ( project.board ) project.board ( B )
                 }
 
                 dlgHBoxLayout{
-                    dlgLabel ( "Override move speed:" );
+                    dlgLabel ( "Override move speed in %:" );
 
                     dlgIntEdit ( board_move_override );
                     dlgLabel ( "%" );
@@ -2208,38 +2208,42 @@ if ( project.board ) project.board ( B )
                                     }
 
                                 }
-                                dlgCell ( cellx, celly++ ) {
-                                    dlgVBoxLayout {
-                                        dlgSpacing ( 0 );
 
-                                        if ( cellx == 0 )
-                                        {
-                                            dlgLabel ( "Height" );
-                                        }
-
-                                        else
-                                        {
+                                // dropping this for now as it won't reflect changes made in the reel configurations height
+                                if ( 0 ) {
+                                    dlgCell ( cellx, celly++ ) {
+                                        dlgVBoxLayout{
                                             dlgSpacing ( 0 );
 
-                                            switch ( MyLayer ) {
-                                                case 0:
-                                                    //dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
-                                                    dlgLabel ( Num2StrF ( CT_Eheight[cellx - 1 + TopAddLine[pagex]] ) );
-                                                    break;
-
-                                                case 1:
-                                                    //dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 5.00 );
-                                                    dlgLabel ( Num2StrF ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]] ) );
-                                                    break;
-
-                                                case 2:
-                                                    //dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 5.00 );
-                                                    dlgLabel ( Num2StrF ( CM_Eheight[cellx - 1 + MidAddLine[pagez]] ) );
-                                                    break;
+                                            if ( cellx == 0 )
+                                            {
+                                                dlgLabel ( "Height" );
                                             }
-                                        }
 
-                                        dlgStretch ( 1 );
+                                            else
+                                            {
+                                                dlgSpacing ( 0 );
+
+                                                switch ( MyLayer ) {
+                                                    case 0:
+                                                        //dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
+                                                        dlgLabel ( Num2StrF ( CT_Eheight[cellx - 1 + TopAddLine[pagex]] ) );
+                                                        break;
+
+                                                    case 1:
+                                                        //dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 5.00 );
+                                                        dlgLabel ( Num2StrF ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]] ) );
+                                                        break;
+
+                                                    case 2:
+                                                        //dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 5.00 );
+                                                        dlgLabel ( Num2StrF ( CM_Eheight[cellx - 1 + MidAddLine[pagez]] ) );
+                                                        break;
+                                                }
+                                            }
+
+                                            dlgStretch ( 1 );
+                                        }
                                     }
                                 }
 
