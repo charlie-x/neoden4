@@ -1278,7 +1278,8 @@ for ( i = 0; i < MAXREEL ; i++ )
     comboSelected_Top[i] = 0;
     comboSelected_Bottom[i] = 0;
     RotationOffsetSelected[i] = 0;
-    Reel[i + 1] = "Reel# " + Num2Str ( i + 1 );
+    // leave it blank
+    Reel[i + 1] = "";
     // to help with the combox box issue
     ReelNum[i + 1] = "" + Num2Str ( i + 1 );
 
@@ -2298,9 +2299,10 @@ if ( project.board ) project.board ( B )
 
                     // will skip reels with no offset.
                     // lets keep them, if we're using phantom reels
-                    // if ( offsetx == 0 & offsety == 0 ) {
-                    //     continue;
-                    // }
+                    // ok changed my mind again, remove them if offsetx/y and name is 0/empty
+                    if ( offsetx == 0 & offsety == 0  ) { //& strlen ( Reel[j] ) == 0
+                        continue;
+                    }
 
                     //comment = Reel[j];
                     //printf ( "65535,1,%d,%.2f,%.2f,%s,\n", j, offsetx, offsety, comment );
