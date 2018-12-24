@@ -29,7 +29,7 @@ the pnp software should now update all your components to the correct place
 
 check everything :)
 
-
+video version of the text is here https://youtu.be/oF4B8zPS2p8
 
 @notes
  generates a loadable csv
