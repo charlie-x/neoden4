@@ -337,6 +337,14 @@ string Num2Str ( int i )
     sprintf ( str, "%d", i );
     return str;
 }
+//  convert real num to string
+
+string Num2StrF ( real i )
+{
+    string str;
+    sprintf ( str, "%.3f", i );
+    return str;
+}
 
 //trim leading and trailing spaces
 
@@ -1975,7 +1983,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        dlgStretch ( 1 );
+                                        //  dlgStretch ( 1 );
                                     }
 
                                 }
@@ -2007,7 +2015,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        dlgStretch ( 1 );
+                                        //dlgStretch ( 1 );
                                     }
                                 }
 
@@ -2020,7 +2028,7 @@ if ( project.board ) project.board ( B )
 
                                         else
                                         {
-                                            dlgSpacing ( 3 );
+                                            dlgSpacing ( 4 );
 
                                             switch ( MyLayer ) {
                                                 case 0:
@@ -2037,7 +2045,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        dlgStretch ( 1 );
+                                        // dlgStretch ( 1 );
                                     }
                                 }
 
@@ -2097,7 +2105,7 @@ if ( project.board ) project.board ( B )
                                         }
 
 
-                                        dlgStretch ( 1 );
+                                        // dlgStretch ( 1 );
                                     }
 
                                 }
@@ -2129,7 +2137,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        dlgStretch ( 1 );
+                                        // dlgStretch ( 1 );
 
                                     }
 
@@ -2140,7 +2148,7 @@ if ( project.board ) project.board ( B )
                                     dlgVBoxLayout {
                                         if ( cellx == 0 )
                                         {
-                                            dlgLabel ( "Head" );
+                                            dlgLabel ( "Nozzle" );
                                         }
 
                                         else
@@ -2160,7 +2168,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        dlgStretch ( 1 );
+                                        //dlgStretch ( 1 );
                                     }
 
                                 }
@@ -2175,20 +2183,23 @@ if ( project.board ) project.board ( B )
                                         {
                                             switch ( MyLayer ) {
                                                 case 0:
-                                                    dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
+                                                    //dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
+                                                    dlgLabel ( Num2StrF ( CT_Eheight[cellx - 1 + TopAddLine[pagex]] ) );
                                                     break;
 
                                                 case 1:
-                                                    dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 5.00 );
+                                                    //dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 5.00 );
+                                                    dlgLabel ( Num2StrF ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]] ) );
                                                     break;
 
                                                 case 2:
-                                                    dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 5.00 );
+                                                    //dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 5.00 );
+                                                    dlgLabel ( Num2StrF ( CM_Eheight[cellx - 1 + MidAddLine[pagez]] ) );
                                                     break;
                                             }
                                         }
 
-                                        //dlgStretch ( 1 );
+                                        // dlgStretch ( 1 );
                                     }
                                 }
 
@@ -2216,7 +2227,7 @@ if ( project.board ) project.board ( B )
                                             }
                                         }
 
-                                        dlgStretch ( 1 );
+                                        //dlgStretch ( 1 );
                                     }
                                 }
 
