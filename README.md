@@ -5,8 +5,11 @@ dp-neoden4.ulp - rewrite of dangerous prototypes tm220 ulp (modded by jamz and X
 
 you have to move your board in eagle to a place where the fiducials in eagle coordinates are mappable in the machines physical space, so no -X,  or -Y all positive, and enough away from 0,0 where the head can physically move. Otherwise it'll cause an error when you try to use the following instructions
 
-I've added a board offset XY to the CSV output page, so that during export you can move the board instead of moving it in eagle, but both work.
+I've added a board offset XY to the CSV output page, so that during export you can move the boards offset instead of moving it in eagle, but both work. 
 
+This effectively translates the 0,0 origin of eagle to a new origin that matches the origin of the PCB on the PNP, if your PCB starts at 0,0 in eagle then wherever the lower left corner of the PCB is in PNP XY phyiscal coordinates, this should be set as the offset XY. Remembering that if you are using the camera for visual inspection or fiducials both the nozzle and camera position need to be able to moved too physically by the PNP
+
+the PNP software won't work well with negative coordinates, so make sure your outputted CSV is all positive XY
 
 run ulp from board, load or edit the stack, assign and output.
 
