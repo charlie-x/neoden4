@@ -491,11 +491,31 @@ int is_fiducial ( UL_ELEMENT E )
     return 0;
 }
 
+int round_and_clamp ( real value, real lower, real upper )
+{
+    //round it, the neoden will override anything that isn't in steps of 10
+    value /= 10;
+    value = round ( value ) * 10;
+
+    // clamp it, set a minimum value
+    if ( value < lower ) {
+        value = lower;
+    }
+
+    // clamp it, set an upper
+    if ( value > upper ) {
+        value = upper;
+    }
+
+    return value;
+}
+
 // number of fiducials found
 int g_fiducial_count = 0;
 // XY of fiducials found
 real g_fiducial_x[];
 real g_fiducial_y[];
+
 
 // return number of fiducials found and add them to a list
 int scan_for_fiducials()
@@ -2477,23 +2497,7 @@ if ( project.board ) project.board ( B )
                         temp = ( move_speed / 100.0 ) * board_move_override;
 
                         //round it, the neoden will override anything that isn't in steps of 10
-                        temp /= 10;
-                        temp = round ( temp ) * 10;
-
-                        move_speed = temp;
-
-
-                    }
-
-                    // clamp it, set a minimum move speed
-                    if ( move_speed == 0 ) {
-                        move_speed = 10;
-
-                    }
-
-                    // clamp it, set a maximum move speed
-                    if ( move_speed > 100 ) {
-                        move_speed = 100;
+                        move_speed = round_and_clamp ( temp, 10, 100 );
                     }
 
 
