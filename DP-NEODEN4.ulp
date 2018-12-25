@@ -326,7 +326,6 @@ int ReelFeedStrength[];              // feed strength   10 to 100 in steps of 1
 int ReelRate[];              // size to move feeder for one component 2-32
 
 string RotationOffset[];    // 0,90,180,270 - adds angle
-real RotationOffsetSelected[];   // 0-3    ,
 
 string FeedRates[]; // 0 - 100, steps of 10
 int FeedRatesSelected[];   // 0-9
@@ -663,8 +662,6 @@ void parse_reel_line ( string reelString )
         }
 
 
-        // Also Angle
-        RotationOffsetSelected[i] = strtod ( alltrim ( a[6] ) );
     }
 }
 
@@ -915,6 +912,7 @@ void ReelPage ( int reeloffset )
                             }
 
                         }
+                        ////////////////
                         dlgCell ( cellx, celly++ ) {
                             dlgVBoxLayout {
                                 if ( cellx == 0 )
@@ -933,6 +931,7 @@ void ReelPage ( int reeloffset )
                             }
 
                         }
+                        ////////////////
                         dlgCell ( cellx, celly++ ) {
                             dlgVBoxLayout {
                                 if ( cellx == 0 )
@@ -950,7 +949,25 @@ void ReelPage ( int reeloffset )
                             }
 
                         }
+                        ////////////////
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Pick Angle" );
+                                }
 
+                                else
+                                {
+                                    dlgRealEdit ( ReelPickAngle[reelNumber] );
+
+
+                                }
+
+                                dlgStretch ( 1 );
+                            }
+
+                        }
 
                         ////////////////
 
@@ -1077,7 +1094,7 @@ void ReelPage ( int reeloffset )
                             dlgVBoxLayout{
                                 if ( cellx == 0 )
                                 {
-                                    dlgLabel ( "Use Vision" );
+                                    dlgLabel ( "Vision" );
                                 }
 
                                 else
@@ -1161,22 +1178,6 @@ void ReelPage ( int reeloffset )
                                 else
                                 {
                                     dlgSpinBox ( ReelRate[reelNumber], 0, 32 );
-                                }
-
-                                dlgStretch ( 1 );
-                            }
-
-                        }
-                        dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout {
-                                if ( cellx == 0 )
-                                {
-                                    dlgLabel ( "Rotation" );
-                                }
-
-                                else
-                                {
-                                    dlgRealEdit ( RotationOffsetSelected[cellx], -180.00, 180.00 );
                                 }
 
                                 dlgStretch ( 1 );
@@ -1352,7 +1353,6 @@ for ( i = 0; i < MAXREEL ; i++ )
     g_Efeeder_Bottom[i] = 99;
     comboSelected_Top[i] = 0;
     comboSelected_Bottom[i] = 0;
-    RotationOffsetSelected[i] = 0;
     // leave it blank
     Reel[i + 1] = "";
     // to help with the combox box issue
@@ -2707,7 +2707,6 @@ if ( project.board ) project.board ( B )
                             }
                         }
 
-//						real PartsRotation = E.angle + (RotationOffsetSelected[stack + 1] * 90);
                         real PartsRotation = E.angle ;
 
                         if ( E.angle <= 180 ) {
@@ -2719,11 +2718,6 @@ if ( project.board ) project.board ( B )
                         }
 
 
-                        if ( debug == 2 ) {
-                            if ( RotationOffsetSelected[stack + 1] != 0 ) {
-                                printf ( "E.angle= %.2f, Offsetangle=%.2f, TM angle=%.2f  \n", E.angle, RotationOffsetSelected[stack + 1] * 90.0, angle );
-                            }
-                        }
 
                         if ( stack != 99 ) {
                             printf ( "comp,%d,%d,%s,%s,%s,%.2f,%.2f,%.0f,%s,\n",
