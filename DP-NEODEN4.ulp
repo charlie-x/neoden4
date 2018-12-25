@@ -123,7 +123,7 @@ string NSL_partList[] = {
     "stack,28,0,1,24.15,132.82,-90.00,0805,27R,0.50,0,0.50,0,No,-40,1,50,4,80,50,No,No,-40,-40,-40,-40,",
     "stack,29,0,1,23.46,146.66,-90.00,0805,47pF,0.50,0,0.50,0,No,-40,1,50,4,80,50,No,No,-40,-40,-40,-40,",
     "stack,33,0,1,22.89,201.04,-90.00,0805,10K,0.50,0,0.50,0,No,-40,1,50,4,80,50,No,No,-40,-40,-40,-40,",
-    "stack,39,0,2,23.91,283.60,0.00,3535,LEDRGB,0.50,0,1.60,0,No,0,1,25,8,80,50,No,No,-40,-40,-40,-40,",
+    "stack,39,0,2,23.91,283.60,-90.00,3535,LEDRGB,0.50,0,1.60,0,No,0,1,25,8,80,50,No,No,-40,-40,-40,-40,",
     "stack,41,0,1,23.82,320.50,-90.00,SRN6045TA-1R0Y,1uH,0.50,0,5.00,0,No,-40,1,50,8,80,50,No,No,-40,-40,-40,-40,",
     "stack,78,0,1,150.00,290.00,0.00,SOIC127P600X175-8N,LT1963ES8-3.3PBF,0.50,0,0.00,0,No,-40,1,50,1,80,50,No,No,-40,-40,-40,-40,",
     "stack,79,0,1,150.00,300.00,0.00,SC70-6,MBT3904DW1T1,0.50,0,0.00,0,No,-40,1,50,1,80,50,No,No,-40,-40,-40,-40,",
@@ -2476,14 +2476,26 @@ if ( project.board ) project.board ( B )
 
                         temp = ( move_speed / 100.0 ) * board_move_override;
 
+                        //round it, the neoden will override anything that isn't in steps of 10
+                        temp /= 10;
+                        temp = round ( temp ) * 10;
+
                         move_speed = temp;
+
+
                     }
 
                     // clamp it, set a minimum move speed
                     if ( move_speed == 0 ) {
-                        move_speed = 1;
+                        move_speed = 10;
 
                     }
+
+                    // clamp it, set a maximum move speed
+                    if ( move_speed > 100 ) {
+                        move_speed = 100;
+                    }
+
 
                     // -40s at end are thresholds
                     printf (	"stack,%d,%d,%d," +
