@@ -638,6 +638,8 @@ void parse_reel_line ( string reelString )
         // Feeding Rate
         ReelRate[i] = strtol ( alltrim ( a[17] ) );
 
+        //dlgMessageBox ( a[18] + " " + a[19] );
+
         // Feed Strength
         ReelFeedStrength[i] = strtol ( alltrim ( a[18] ) );
 
@@ -1031,6 +1033,63 @@ void ReelPage ( int reeloffset )
 
                         }
                         ////////////////
+                        //ReelFeedStrength
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Feed Strength" );
+                                }
+
+                                else
+                                {
+                                    dlgIntEdit ( ReelFeedStrength[reelNumber] );
+
+
+                                }
+
+                                dlgStretch ( 1 );
+                            }
+
+                        }
+                        //ReelPeelStrength
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Peel Strength" );
+                                }
+
+                                else
+                                {
+                                    dlgIntEdit ( ReelPeelStrength[reelNumber] );
+
+
+                                }
+
+                                dlgStretch ( 1 );
+                            }
+
+                        }
+                        ////////////////
+                        //ReelVisionAlignment
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Use Vision" );
+                                }
+
+                                else
+                                {
+                                    dlgCheckBox ( "", ReelVisionAlignment[reelNumber] );
+
+                                }
+
+                                dlgStretch ( 1 );
+                            }
+
+                        }
 
                         dlgCell ( cellx, celly++ ) {
                             dlgVBoxLayout {
@@ -2421,13 +2480,15 @@ if ( project.board ) project.board ( B )
 
                     }
 
+                    // -40s at end are thresholds
                     printf (	"stack,%d,%d,%d," +
                                 "%.2f,%.2f,%.2f," +
                                 "%s,%s," +
 
                                 "%.2f,%d,%.2f,%d," +
-                                "%s,%d,%d,"
-                                "%d,%d,%d,%d,%s,%s,\n",
+                                "%s,%d,%d," +
+                                "%d,%d,%d,%d,%s,%s," +
+                                "-40,-40,-40,-40,\n",
 
                                 j, id, ReelHead[j],
                                 ReelOffSetX[j], ReelOffSetY[j], ReelPickAngle[j],
