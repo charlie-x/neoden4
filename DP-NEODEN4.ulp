@@ -1,4 +1,4 @@
-#usage "Generate a CSV file suitable for Neoden 4 Pick n Place\n"
+#usage "Generate a CSV file suitable for Neoden 4 Pick n Place software V4.1.3 B9\n"
 "Created by Dangerous Prototypes.com\n"
 "Ian Lesnet (Feb. 18, 2013)\n"
 "Parts of the code from Xinort\n"
@@ -16,6 +16,7 @@ string VERSION = "1.0i";
 int LinesPerTab = 24;            // limit lines per tab. if lines are more than this make a new tab
 int MAXREEL = 98;                // 16 Reels for tm220a, 24 for tm240 (untested), 98 for Neoden4, 99 is considered unused
 int REELS_PER_PAGE = 14;        // reels shown per page
+int SPECIALREEL = 49;			// in the neoden4 49 and up are special reels.
 
 int tabloop;
 int AddTab = 0;
@@ -44,7 +45,7 @@ real board_offset_y = 0;
 // override move speed
 int board_move_override = 100;
 
-// if you already know the rotation, note the neoden UI rounds the value, the csv has the more accurate value
+// if you already know the rotation, note the neoden UI rounds the value, the csv has the floating point representation
 real g_board_rotation = 0;
 
 
@@ -74,7 +75,10 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
                         "EOL|0.00|0.00|EOL"
                        };       // EOL - End of line indicator
 
-// example neoden 4 feeder csv
+// example neoden 4 feeder csv - tested with Neoden software V4.1.3 B9
+
+// Nozzle can be a list so if its 1, its 1, if its 1 and 4, its 14, all would be 1234
+
 //#Feeder, Feeder ID, Type, Nozzle, X, Y, Angle, Footprint, Value, Pick height, Pick delay, Placement height, Placement delay, Vacuum test, Vacuum value, Vision alignment, Speed, SkipSize testFlash typeLighting brightness, , , , ,
 //stack,  5, 0, 34, 526.7 ,  0    ,     0, 1206, 1206,    0, 0,    0, 0, No, -40, 1, 100, No, No,  1, 50, 4, 100
 //stack,  6, 0, 34, 506.5 ,  0    ,     0, 1206, 1206,    0, 0,    0, 0, No, -40, 1, 100, No, No,  1, 50, 4, 100
@@ -84,7 +88,7 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
 ///       0  1   2    3        4     5      6         7            8     9   10    11 12  13  14   15   16  17  18 19  20
 //stack,  1, 0,   , 413.00,  90.00, -123.01, 0805, footprint / one, 0.50,  9, 0.00, 10, Yes, -40, 0, 100, 4, 50, 80, Yes, Yes,
 
-// feeders 53+ are special, tray feeders in GUI but its 49+ in output file
+// feeders 49+ are special, tray feeders in GUI but its 49+ in output file
 //stack, 49, 1, 1, 400.00, 35.00, 0.00, , 49, 0.50, 0, 0.00, 0, No, -40, 1, 100, 1, 1, 400.00, 35.00, 1, 1, No, No,
 //stack, 50, 1, 1, 400.00, 46.00, 0.00, , 50, 0.50, 0, 0.00, 0, No, -40, 1, 100, 1, 1, 400.00, 46.00, 1, 1, No, No,
 
@@ -96,7 +100,28 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
 // Feeder ID, Type, Nozzle, X, Y, Angle, Footprint, Value, Pick height, Pick delay, Placement height,
 // Placement delay, Vacuum test, Vacuum value, Vision alignment, Speed,
 // SkipSize testFlash typeLighting brightness, , , , ,
-//#Feeder,Feeder ID,Type,Nozzle,X,Y,Angle,Footprint,Value,Pick height,Pick delay,Placement height,Placement delay,Vacuum detection,Vacuum value,Vision alignment,Speed,
+
+
+///////////////////////////////////////////////
+// normal feeder setup
+//#Feeder,Feeder ID,Type,Nozzle, X,       Y,    Angle, Footprint, Value ,Pick height,Pick delay,Placement height,Placement delay,Vacuum detection,Vacuum value,Vision alignment,Speed,
+//stack,       2,     0,  12,  409.87, 101.73, 90.00,  0805,       2.2nF,     0.50,       0,          0.50,             0,             No,            -40,            1,           50,
+
+//continued (different to special feeders)
+// Feed Rate, Feed torque,  Peel Strength,   skip,  size correct        Thresholds for nozzles 1-4
+// 4,          80,            50,             No,        No,             -40, -40, -40, -40,
+
+///////////////////////////////////////////////
+//special feeders have a different format.
+
+//#Feeder, Feeder ID, Type, Nozzle,    X,      Y, Angle, Footprint, Value  , Pick height, Pick delay, Place Height, Place Delay, Vacuum Discard,  Threshold, Vision Alignment, Speed,
+//stack,   98,          1,    1 ,  92.27, 226.88, 0.00,     0805,   special,-1.00,            0,           0.00,         0,            No,            -40,       1,                50,
+
+//continued, differences are here
+// columns, rows, right top x , right top y, startx, starty,   skip, size correct,  thresholds for nozzles 1-4
+// 9,        8,   162.27,      206.88,         3,       4,        No,      No,       -40,-40,-40,-40,
+
+
 
 // you  can copy and paste a neoden4 stack in here, just add a " at the start and ", at the end, on the last line at the end use " instead of ",
 // this will work with either , or | as a delimiter
@@ -153,6 +178,16 @@ string NSL_partList[] = {
 
 int  DP_stack_Loaded = 0;    // flag 1 if dp stack is loaded
 
+/// array for trays which are 49 and up
+//struct {
+int trayColumns[];
+int trayRows[];
+// coords
+real trayRightTopX[];
+real trayRightTopY[];
+int trayStartX[];
+int trayStartY[];
+//}
 
 // array for each individual parts as found in the pcb
 //struct {
@@ -307,11 +342,9 @@ string ReelNameAndFoot[];    // auto generated name for reel name and footprint
 
 string ReelNum[];		// string version of reel index
 
-//string ReelAlias[];     // user defined names for reels
-//string ReelValue[];     // user defined names for reels
 
 // Feeder Basic Information
-int ReelHead[];       // Nozzle used for this reel 1,2,3,4
+int ReelHead[];       // Nozzle index into NozzleCombo used for this reel 1,2,3,4 etc
 real ReelOffSetX[];
 real ReelOffSetY[];
 
@@ -342,8 +375,36 @@ int xmax = -2147483648;
 int xmin = 2147483647;
 int maxComboLen_Top = -1, maxComboLen_Bottom = -1, maxComboLen_Mid = -1;   // maximum lenght of string in the combobox
 
+//list of nozzle combinations for the parts dropdown
+string nozzleCombo[] = { "-",
+                         "1", "2", "3", "4",
+                         "12", "13", "14",
+                         "22", "23", "24",
+                         "34",
+                         "123", "124",
+                         "234",
+                         "1234"
+                       };
+
 //-------------------------------------------------------------------------------------------------------
 
+
+// converts from nozzle combo to a single nozzle
+int convert_to_nozzle ( int noz_id )
+{
+    string newnoz = "";
+
+    // first entry is empty
+    if ( noz_id == 0 ) { return 0; }
+
+    newnoz = nozzleCombo[noz_id];
+
+    //terminate
+    newnoz[1] = 0;
+
+
+    return strtol ( newnoz );
+}
 
 //  convert num to string
 string Num2Str ( int i )
@@ -457,8 +518,9 @@ real get_first_x()
     board ( B ) {
         B.elements ( E ) {
             // try to get the first part to be placed
-            if ( skip_part ( E ) == 1 )
-            { return u2mm ( E.x ) ; }
+            if ( skip_part ( E ) == 1 ) {
+                return u2mm ( E.x ) ;
+            }
         }
     }
     return -1;
@@ -478,6 +540,7 @@ real get_first_y()
     return -1;
 }
 
+// check to see if its a fiducial, maybe we should test something longer
 int is_fiducial ( UL_ELEMENT E )
 {
     // does name contain FID
@@ -496,7 +559,7 @@ int is_fiducial ( UL_ELEMENT E )
 
 int round_and_clamp ( real value, real lower, real upper )
 {
-    //round it, the neoden will override anything that isn't in steps of 10
+    //round it, the neoden will override anything that isn't in steps of 10 for some values
     value /= 10;
     value = round ( value ) * 10;
 
@@ -515,7 +578,8 @@ int round_and_clamp ( real value, real lower, real upper )
 
 // number of fiducials found
 int g_fiducial_count = 0;
-// XY of fiducials found
+
+// XY list of fiducials found, in eagle space
 real g_fiducial_x[];
 real g_fiducial_y[];
 
@@ -556,29 +620,86 @@ void write_reel_line ( int j )
 {
     string str;
 
-    sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%d|%s|%s\n",
-              j,									//%d 1
-              0,									//%d 2
-              ReelHead[j],							//%d 3
-              ReelOffSetX[j],						//%.2f 4
-              ReelOffSetY[j],						//%.2f 5
-              ReelPickAngle[j],						//%.2f 6
-              ReelFootPrint[j],						//%s 7
-              Reel[j],								//%s 8
-              ReelHeight[j],						//%.2f
-              ReelPickDelay[j],						//%d
-              ReelPlaceHeight[j],					//%.2f
-              ReelPlaceDelay[j],					//%d
-              ReelVacuumDetection[j] ? "YES" : "NO",//%s
-              ReelVacuumValue[j],					//%d
-              ReelVisionAlignment[j],				//%d
-              ReelMoveSpeed[j],						//%d
-              ReelRate[j],							//%d
-              ReelFeedStrength[j],					//%d
-              ReelPeelStrength[j],					//%d
-              ReelSkip[j] ? "YES" : "NO",			//%s
-              ReelSizeCorrect[j] ? "YES" : "NO"		//%s
-            );
+    // ReelHead/nozzle is now an index into the nozzleCombo
+
+    if ( j < SPECIALREEL ) {
+
+
+        ///////////////////////////////////////////////
+        // normal feeder setup
+        //#Feeder,Feeder ID,Type,Nozzle, X,       Y,    Angle, Footprint, Value ,Pick height,Pick delay,Placement height,Placement delay,Vacuum detection,Vacuum value,Vision alignment,Speed,
+        //stack,       2,     0,  12,  409.87, 101.73, 90.00,  0805,       2.2nF,     0.50,       0,          0.50,             0,             No,            -40,            1,           50,
+
+        //continued (different to special feeders)
+        // Feed Rate, Feed torque,  Peel Strength,   skip,  size correct        Thresholds for nozzles 1-4
+        // 4,          80,            50,             No,        No,             -40, -40, -40, -40,
+
+
+        sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%d|%s|%s\n",
+                  j,									//%d 1
+                  0,									//%d 2
+                  ReelHead[j],							//%d 3
+                  ReelOffSetX[j],						//%.2f 4
+                  ReelOffSetY[j],						//%.2f 5
+                  ReelPickAngle[j],						//%.2f 6
+                  ReelFootPrint[j],						//%s 7
+                  Reel[j],								//%s 8
+                  ReelHeight[j],						//%.2f
+                  ReelPickDelay[j],						//%d
+                  ReelPlaceHeight[j],					//%.2f
+                  ReelPlaceDelay[j],					//%d
+                  ReelVacuumDetection[j] ? "YES" : "NO",//%s
+                  ReelVacuumValue[j],					//%d
+                  ReelVisionAlignment[j],				//%d
+                  ReelMoveSpeed[j],						//%d
+                  // changes here
+                  ReelRate[j],							//%d
+                  ReelFeedStrength[j],					//%d
+                  ReelPeelStrength[j],					//%d
+                  ReelSkip[j] ? "YES" : "NO",			//%s
+                  ReelSizeCorrect[j] ? "YES" : "NO"		//%s
+                );
+
+    } else {
+
+        ///////////////////////////////////////////////
+        //special feeders have a different format.
+
+        //#Feeder, Feeder ID, Type, Nozzle,    X,      Y, Angle, Footprint, Value  , Pick height, Pick delay, Place Height, Place Delay, Vacuum Discard,  Threshold, Vision Alignment, Speed,
+        //stack,   98,          1,    1 ,  92.27, 226.88, 0.00,     0805,   special,-1.00,            0,           0.00,         0,            No,            -40,       1,                50,
+
+        //continued, differences are here
+        // columns, rows, right top x , right top y, startx, starty,   skip, size correct,  thresholds for nozzles 1-4
+        // 9,        8,   162.27,      206.88,         3,       4,        No,      No,       -40,-40,-40,-40,
+
+
+        sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%.3f|%.3f|%d|%d\n",
+                  j,									//%d 1
+                  0,									//%d 2
+                  ReelHead[j],							//%d 3
+                  ReelOffSetX[j],						//%.2f 4
+                  ReelOffSetY[j],						//%.2f 5
+                  ReelPickAngle[j],						//%.2f 6
+                  ReelFootPrint[j],						//%s 7
+                  Reel[j],								//%s 8
+                  ReelHeight[j],						//%.2f
+                  ReelPickDelay[j],						//%d
+                  ReelPlaceHeight[j],					//%.2f
+                  ReelPlaceDelay[j],					//%d
+                  ReelVacuumDetection[j] ? "YES" : "NO",//%s
+                  ReelVacuumValue[j],					//%d
+                  ReelVisionAlignment[j],				//%d
+                  ReelMoveSpeed[j],						//%d
+
+                  // changes here
+                  trayColumns[j],						//%d
+                  trayRows[j],							//%d
+                  trayRightTopX[j],						//%f
+                  trayRightTopY[j],						//%f
+                  trayStartX[j], 						//%d
+                  trayStartY[j]							//%d
+                );
+    }
 
     printf ( str );
 }
@@ -608,7 +729,7 @@ void parse_reel_line ( string reelString )
         // a[1] = feeder index
         // a[2] = type
 
-        // head = nozzle
+        // head = nozzle index to combo box
         ReelHead[i] = strtol ( alltrim ( a[3] ) );
 
         // XY location of feeder
@@ -620,8 +741,6 @@ void parse_reel_line ( string reelString )
 
         // Footprint
         ReelFootPrint[i] = ( alltrim ( a[7] ) );
-        // FootPrint
-        //ReelValue[i] = alltrim ( a[7] );
 
         // package and value is combined in the neoden stack
         if ( strlen ( alltrim ( a[8] ) ) ) {
@@ -661,35 +780,152 @@ void parse_reel_line ( string reelString )
         // Speed
         ReelMoveSpeed[i] = strtol ( alltrim ( a[16] ) );
 
-        // Feedbox Info
-        // Feeding Rate
-        ReelRate[i] = strtol ( alltrim ( a[17] ) );
+        if ( i < SPECIALREEL ) {
+            // Feedbox Info
+            // Feeding Rate
+            ReelRate[i] = strtol ( alltrim ( a[17] ) );
 
-        //dlgMessageBox ( a[18] + " " + a[19] );
 
-        // Feed Strength
-        ReelFeedStrength[i] = strtol ( alltrim ( a[18] ) );
+            // Feed Strength
+            ReelFeedStrength[i] = strtol ( alltrim ( a[18] ) );
 
-        // Peel Strength
-        ReelPeelStrength[i] = strtol ( alltrim ( a[19] ) );
+            // Peel Strength
+            ReelPeelStrength[i] = strtol ( alltrim ( a[19] ) );
 
-        // Skip (Yes/No)
-        if ( alltrim ( a[20] ) == "Yes" ) {
-            ReelSkip[i] = 1;
+            // Skip (Yes/No)
+            if ( alltrim ( a[20] ) == "Yes" ) {
+                ReelSkip[i] = 1;
+
+            } else {
+                ReelSkip[i] = 0;
+            }
+
+            // Size Correct ( CheckMark Yes/No)
+            if ( alltrim ( a[21] ) == "Yes" ) {
+                ReelSizeCorrect[i] = 1;
+
+            } else {
+                ReelSizeCorrect[i] = 0;
+            }
 
         } else {
-            ReelSkip[i] = 0;
+            // read special feeders.
+
+            // (int)
+            trayColumns[i] = strtol ( alltrim ( a[17] ) );
+            trayRows[i] = strtol ( alltrim ( a[18] ) );
+
+            // coords (real)
+            trayRightTopX[i] = strtod ( alltrim ( a[19] ) );
+            trayRightTopY[i] = strtod ( alltrim ( a[20] ) );
+
+            // (int)
+            trayStartX[i] = strtol ( alltrim ( a[21] ) );
+            trayStartY[i] = strtol ( alltrim ( a[22] ) );
         }
 
-        // Size Correct ( CheckMark Yes/No)
-        if ( alltrim ( a[21] ) == "Yes" ) {
-            ReelSizeCorrect[i] = 1;
+    }
+}
 
-        } else {
-            ReelSizeCorrect[i] = 0;
-        }
+// the defaults are stored in config.ini,under [Stack] they are stored as Variants, motorola format 0x87 is the type,  then the 4 digits are a 32 bit float, if only three , add \x00 at end to pad.
+// you pull it from a default csv if you switch on all the feeders in the feeder tab, or from the system setup page,smd configuration
+// positions of reels in neoden4 as defaults, used to seed new
+// also.. phew....
+
+// starts from reel 1
+
+// x coordinates of feeders
+//                         reel 1           2           3            4           5           6      7     8     9       10
+real default_reel_x[] = { 410.2232666, 409.8671875, 409.8482361, 409.9453125, 409.578125, 409.67, 409.52, 409.99, 410.02, 409.79,
+//                             11    12    13     14     15    16      17    18      19    20
+                          410.07, 409.55, 410.10, 410.04, 409.71, 409.97, 410.50, 410.60, 413.00, 23.05,
+//                             21    22    23     24     25    26      27    28      29    30
+                          23.04, 23.24, 22.98, 23.21, 24.09, 23.38, 23.29, 24.15, 23.46, 22.86,
+//                             31    32    33     34     35    36      37    38      39    40
+                          23.58, 23.21, 22.89, 22.86, 23.36, 23.43, 23.27, 23.38, 23.53, 23.62,
+//                             41    42    43     44     45    46      47    48      49    50
+                          23.82, 24.54, 20.80, 30.00, 30.00, 30.00, 30.00, 30.00, 400.00, 400.00,
+//                             51    52    53     54     55    56      57    58      59    60
+                          400.00, 400.00, 400.00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00,
+//                             61    62    63     64     65    66      67    68      69    70
+                          150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00,
+//                             71    72    73     74     75    76      77    78      79    80
+                          150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00,
+//                             81    82    83     84     85    86      87    88      89    90
+                          150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 150, 00, 132.64,
+//                             91    92    93     94     95    96      97    98
+                          121.00, 97.88, 159.49, 146.93, 134.39, 120.06, 107.73, 92.27
 
 
+                        };
+
+// y coordinates of feeders
+//                         reel 1           2           3            4           5           6      7     8     9       10
+real default_reel_y[] = { 88.27677155, 101.9296875, 115.0446625, 137.2856445, 142.01, 155.74, 168.95, 249.23, 262.96, 276.41,
+//                             11    12    13     14     15    16      17    18      19    20
+                          289.90, 303.18, 317.20, 330.72, 344.21, 357.44, 374.14, 391.64, 416.00, 24.34,
+//                             21    22    23     24     25    26      27    28      29    30
+                          37.43, 51.09, 64.63, 78.33, 91.90, 105.73, 119.48, 132.82, 146.66, 160.32,
+//                             31    32    33     34     35    36      37    38      39    40
+                          173.85, 187.41, 201.04, 214.54, 227.81, 241.46, 255.18, 268.63, 283.98, 301.84,
+//                             41    42    43     44     45    46      47    48      49    50
+                          320.50, 341.96, 374.70, 342.00, 355.00, 368.00, 381.00, 394.00, 35.00, 46.00,
+//                             51    52    53     54     55    56      57    58      59    60
+                          57.00, 68.00, 79.00, 50.00, 60.00, 70.00, 80.00, 90.00, 100.00, 342.19,
+//                             61    62    63     64     65    66      67    68      69    70
+                          120.00, 130.00, 140.00, 150.00, 160.00, 170.00, 180.00, 190.00, 200.00, 210.00,
+//                             71    72    73     74     75    76      77    78      79    80
+                          220.00, 230.00, 240.00, 250.00, 260.00, 270.00, 280.00, 290.00, 300.00, 310.00,
+//                             81    82    83     84     85    86      87    88      89    90
+                          320.00, 330.00, 340.00, 350.00, 360.00, 370.00, 380.00, 390.00, 400.00, 217.56,
+//                             91    92    93     94     95    96      97    98
+                          217.52, 211.92, 227.05, 227.88, 227.57, 227.38, 227.09, 226.88
+                        };
+
+// get the default feeder X address  for reel number 1-MAXREEL
+real default_feeder_x ( int index )
+{
+    if ( index < 0 ) { return 0; }
+
+    if ( index < MAXREEL ) { return 0; }
+
+    index--;
+    return default_reel_x[index];
+}
+
+// get the default feeder X address  for reel number 1-MAXREEL
+real default_feeder_y ( int index )
+{
+    if ( index < 0 ) { return 0; }
+
+    if ( index < MAXREEL ) { return 0; }
+
+    index--;
+    return default_reel_y[index];
+}
+
+void set_defaults()
+{
+    // fill some defaults
+    for ( int j = 0; j < MAXREEL; j++ ) {
+
+        Reel[j] = "Reel " + Num2Str ( j );
+
+        // reel position defaults
+        ReelOffSetX[j] = default_feeder_x ( j );
+        ReelOffSetY[j] = default_feeder_y ( j );
+
+        // trays ( only 49 up)
+        trayColumns[j] = 1;
+        trayRows[j] = 1;
+
+        // coords
+        trayRightTopX[j] = default_feeder_x ( j );
+        trayRightTopY[j] = default_feeder_y ( j );
+
+        // step size
+        trayStartX[j] = 1;
+        trayStartY[j] = 1;
     }
 }
 
@@ -699,10 +935,7 @@ void Load_Stack ( string who )
     int i;
     int j;
 
-    // fill some defaults
-    for ( j = 0; j < MAXREEL; j++ ) {
-        Reel[j] = "Reel " + Num2Str ( j  );
-    }
+    set_defaults();
 
     for ( j = 0; j < MAXREEL; j++ ) {
 
@@ -875,8 +1108,8 @@ void ReelPage ( int reeloffset )
                                 } else
                                 {
 
-                                    dlgSpinBox ( ReelHead[reelNumber], 1, 4 );
-
+                                    //dlgSpinBox ( ReelHead[reelNumber], 1, 4 );
+                                    dlgComboBox ( nozzleCombo, ReelHead[reelNumber] ) dlgRedisplay();
                                 }
 
                                 // dlgStretch ( 1 );
@@ -1078,46 +1311,7 @@ void ReelPage ( int reeloffset )
 
                         }
                         ////////////////
-                        //ReelFeedStrength
-                        dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout{
-                                if ( cellx == 0 )
-                                {
-                                    dlgLabel ( "Feed Strength" );
-                                }
-
-                                else
-                                {
-                                    dlgIntEdit ( ReelFeedStrength[reelNumber] );
-
-
-                                }
-
-                                dlgStretch ( 1 );
-                            }
-
-                        }
-                        //ReelPeelStrength
-                        dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout{
-                                if ( cellx == 0 )
-                                {
-                                    dlgLabel ( "Peel Strength" );
-                                }
-
-                                else
-                                {
-                                    dlgIntEdit ( ReelPeelStrength[reelNumber] );
-
-
-                                }
-
-                                dlgStretch ( 1 );
-                            }
-
-                        }
-                        ////////////////
-                        //ReelVisionAlignment
+//ReelVisionAlignment
                         dlgCell ( cellx, celly++ ) {
                             dlgVBoxLayout{
                                 if ( cellx == 0 )
@@ -1137,7 +1331,7 @@ void ReelPage ( int reeloffset )
                         }
 
                         dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout {
+                            dlgVBoxLayout{
                                 if ( cellx == 0 )
                                 {
                                     dlgLabel ( "Vac Detect" );
@@ -1153,68 +1347,226 @@ void ReelPage ( int reeloffset )
                             }
 
                         }
-                        ////////////////
 
-                        dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout {
-                                if ( cellx == 0 )
-                                {
-                                    dlgLabel ( "Skip" );
+                        if ( reelNumber < SPECIALREEL ) {
+                            ////////////////
+                            //ReelFeedStrength
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Feed Strength" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgIntEdit ( ReelFeedStrength[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
                                 }
 
-                                else
-                                {
-                                    dlgCheckBox ( "", ReelSkip[reelNumber] );
+                            }
+                            //ReelPeelStrength
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Peel Strength" );
+                                    }
 
+                                    else
+                                    {
+                                        dlgIntEdit ( ReelPeelStrength[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
                                 }
 
-                                dlgStretch ( 1 );
                             }
 
-                        }
-                        ////////////////
+                            ////////////////
 
-                        dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout {
-                                if ( cellx == 0 )
-                                {
-                                    dlgLabel ( "SizeCorrect" );
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Skip" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgCheckBox ( "", ReelSkip[reelNumber] );
+
+                                    }
+
+                                    dlgStretch ( 1 );
                                 }
 
-                                else
-                                {
-                                    dlgCheckBox ( "", ReelSizeCorrect[reelNumber] );
+                            }
+                            ////////////////
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "SizeCorrect" );
+                                    }
 
+                                    else
+                                    {
+                                        dlgCheckBox ( "", ReelSizeCorrect[reelNumber] );
+
+                                    }
+
+                                    dlgStretch ( 1 );
                                 }
 
-                                dlgStretch ( 1 );
                             }
 
-                        }
-
-                        ////////////////// feed box
+                            ////////////////// feed box
 
 
 
-                        dlgCell ( cellx, celly++ ) {
-                            dlgVBoxLayout {
-                                if ( cellx == 0 )
-                                {
-                                    dlgLabel ( "Feeding Rate" );
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Feeding Rate" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgSpinBox ( ReelRate[reelNumber], 0, 32 );
+                                    }
+
+                                    dlgStretch ( 1 );
                                 }
 
-                                else
-                                {
-                                    dlgSpinBox ( ReelRate[reelNumber], 0, 32 );
-                                }
-
-                                dlgStretch ( 1 );
                             }
 
+
+                        } else {
+                            //trayColumns[j],						//%d
+                            //trayColumns
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Columns" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgIntEdit ( trayColumns[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
+                                }
+
+                            }
+                            // trayRows[j],							//%d
+                            //trayColumns
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Rows" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgIntEdit ( trayRows[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
+                                }
+
+                            }
+                            //trayRightTopX[j],						//%f
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Right Top X" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgRealEdit ( trayRightTopX[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
+                                }
+
+                            }
+                            //trayRightTopY[j],						//%f
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Right Top Y" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgRealEdit ( trayRightTopY[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
+                                }
+
+                            }
+                            //trayStartX[j], 						//%d
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Start X" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgIntEdit ( trayStartX[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
+                                }
+
+                            }
+                            //trayStartY[j]							//%d
+                            dlgCell ( cellx, celly++ ) {
+                                dlgVBoxLayout{
+                                    if ( cellx == 0 )
+                                    {
+                                        dlgLabel ( "Start Y" );
+                                    }
+
+                                    else
+                                    {
+                                        dlgIntEdit ( trayStartY[reelNumber] );
+
+
+                                    }
+
+                                    dlgStretch ( 1 );
+                                }
+
+                            }
                         }
-
-
-
 
 
                         dlgCell ( cellx, celly++ ) {
@@ -1295,7 +1647,8 @@ void ReelPage ( int reeloffset )
                                     if ( CT_ReelNo[j] == i ) {
                                         CT_Eheight[j]  = ReelHeight[i];
                                         CT_Rate[j]  = ReelRate[i];
-                                        CT_Ehead[j] = ReelHead[i];
+                                        // reels can have all variations of all 4 nozzles, but the component list can only have the first.
+                                        CT_Ehead[j] = convert_to_nozzle ( ReelHead[i] );
                                     }
                                 }
 
@@ -1303,7 +1656,7 @@ void ReelPage ( int reeloffset )
                                     if ( CB_ReelNo[j] == i ) {
                                         CB_Eheight[j]  = ReelHeight[i];
                                         CB_Rate[j]  = ReelRate[i];
-                                        CB_Ehead[j] = ReelHead[i];
+                                        CB_Ehead[j] = convert_to_nozzle ( ReelHead[i] );
                                     }
                                 }
 
@@ -1372,8 +1725,8 @@ void ReelPage ( int reeloffset )
 
 // Initialize variables
 Reel[0] = "--------";
-//ReelValue[0] = Reel[0];
 ReelNum[0] = "--";
+set_defaults();
 
 for ( i = 0; i < MAXREEL ; i++ )
 {
@@ -1386,7 +1739,6 @@ for ( i = 0; i < MAXREEL ; i++ )
     // to help with the combox box issue
     ReelNum[i + 1] = "" + Num2Str ( i + 1 );
 
-    //ReelValue[i + 1] = Reel[i + 1];
     g_Head_Top[i] = 1;
     g_Head_Bottom[i] = 1;
     g_Eheight_Top[i] = 0.00;
@@ -2290,14 +2642,18 @@ if ( project.board ) project.board ( B )
                                             switch ( MyLayer ) {
                                                 case 0:
                                                     dlgSpinBox ( CT_Ehead[cellx - 1 + TopAddLine[pagex]], 1, 4 );
+                                                    //dlgComboBox ( nozzleCombo, CT_Ehead[cellx - 1 + TopAddLine[pagex]] ) dlgRedisplay();
+
                                                     break;
 
                                                 case 1:
                                                     dlgSpinBox ( CB_Ehead[cellx - 1 + BottomAddLine[pagey]], 1, 4 );
+                                                    //dlgComboBox ( nozzleCombo, CB_Ehead[cellx - 1 + BottomAddLine[pagey]] ) dlgRedisplay();
                                                     break;
 
                                                 case 2:
-                                                    dlgSpinBox ( CM_Ehead[cellx - 1 + MidAddLine[pagez]], 1, 4 );
+                                                    //dlgSpinBox ( CM_Ehead[cellx - 1 + MidAddLine[pagez]], 1, 4 );
+                                                    //dlgComboBox ( nozzleCombo, CM_Ehead[cellx - 1 + MidAddLine[pagez]] ) dlgRedisplay();
                                                     break;
                                             }
                                         }
@@ -2491,10 +2847,21 @@ if ( project.board ) project.board ( B )
 
                     id = 0;
 
-                    // special feeder(this crashed older versions of neoden software, have to look into
-                    if ( j > 48 ) {
-                        id = 0;
+                    // special feeder(this crashed older versions of neoden software, have to look into it
+                    if ( j >= SPECIALREEL ) {
+                        id = 1;
                     }
+
+                    //special feeders have a different format.
+
+                    //#Feeder, Feeder ID, Type, Nozzle,    X,      Y, Angle, Footprint, Value  , Pick height, Pick delay, Place Height, Place Delay, Vacuum Discard,  Threshold, Vision Alignment, Speed,
+                    //stack,   98,          1,    1 ,  92.27, 226.88, 0.00,     0805,   special,-1.00,            0,           0.00,         0,            No,            -40,       1,                50,
+
+                    //continued
+                    // columns, rows, right top x , right top y, startx, starty,   skip, size correct,  thresholds for nozzles 1-4
+                    // 9,        8,   162.27,      206.88,         3,       4,        No,      No,       -40,-40,-40,-40,
+
+                    // Nozzle can be a list so if its 1, its 1, if its 1 and 4, its 14, all would be 1234
 
                     // calculate an overide move speed
                     int move_speed = ReelMoveSpeed[j];
@@ -2514,6 +2881,9 @@ if ( project.board ) project.board ( B )
                         move_speed = round_and_clamp ( temp, 10, 100 );
                     }
 
+                    int nozzleid;
+                    // converts to a number, since eagle combo boxes don't work without a first entry which we have as -
+                    nozzleid = strtol ( nozzleCombo[ReelHead[j]] );
 
                     // -40s at end are thresholds
                     printf (	"stack,%d,%d,%d," +
@@ -2525,7 +2895,7 @@ if ( project.board ) project.board ( B )
                                 "%d,%d,%d,%d,%s,%s," +
                                 "-40,-40,-40,-40,\n",
 
-                                j, id, ReelHead[j],
+                                j, id, nozzleid,
                                 ReelOffSetX[j], ReelOffSetY[j], ReelPickAngle[j],
                                 ReelFootPrint[j], Reel [j],
 
