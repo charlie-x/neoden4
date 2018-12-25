@@ -44,6 +44,9 @@ real board_offset_y = 0;
 // override move speed
 int board_move_override = 100;
 
+// if you already know the rotation, note the neoden UI rounds the value, the csv has the more accurate value
+real g_board_rotation = 0;
+
 
 int i, j, k, l, m, n = 0;       //general purpose iteration/index variable
 // --------------------------------------------Display clickable Picture, linked to DP ------------------------------------------
@@ -1683,12 +1686,15 @@ if ( project.board ) project.board ( B )
             board_offset_x = strtod ( alltrim ( a[0] ) );
             board_offset_y = strtod ( alltrim ( a[1] ) );
             board_move_override = strtod ( alltrim ( a[2] ) );
+
+            g_board_rotation = strtod ( alltrim ( a[3] ) );
         }
 
     } else {
         board_offset_x = 0;
         board_offset_y = 0;
         board_move_override = 100;
+        g_board_rotation = 0;
 
     }
 
@@ -1851,6 +1857,14 @@ if ( project.board ) project.board ( B )
                     dlgLabel ( "%" );
                     dlgStretch ( 1 );
                 }
+                dlgHBoxLayout{
+                    dlgLabel ( "Board rotation in degrees:" );
+
+                    dlgRealEdit ( g_board_rotation );
+                    dlgLabel ( "o" );
+                    dlgStretch ( 1 );
+                }
+
 
                 dlgHBoxLayout {
                     dlgLabel ( "Enter CSV Export File (TOP):" );
@@ -2421,7 +2435,7 @@ if ( project.board ) project.board ( B )
 
         if ( paramsFilename != "" ) {
             output ( paramsFilename ) {
-                printf ( "%.3f,%.3f,%d\n", board_offset_x, board_offset_y, board_move_override );
+                printf ( "%.3f,%.3f,%d,%f\n", board_offset_x, board_offset_y, board_move_override, g_board_rotation );
             }
         }
 
@@ -2561,8 +2575,9 @@ if ( project.board ) project.board ( B )
                     }
                 }
 
-                //  rows, cols, left bottom(x.y),......
-                printf ( "mirror_create,1,1,%.3f,%.3f,0,0,0,0,0,\n", first_x, first_y );
+                //  rows, cols, left bottom(x.y),...... last one is board rotation
+                // mirror_create,1,1,259.14,338.93,0,0,0,0,-0.187445,
+                printf ( "mirror_create,1,1,%.3f,%.3f,0,0,0,0,%f,\n", first_x, first_y, g_board_rotation );
 
 
 
