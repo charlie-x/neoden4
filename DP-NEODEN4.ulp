@@ -125,12 +125,11 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
 // 9,        8,   162.27,      206.88,         3,       4,        No,      No,       -40,-40,-40,-40,
 
 // you  can copy and paste a neoden4 stack in here, just add a " at the start and ", at the end, on the last line at the end use " instead of ",
-// this will work with either , or | as a delimiter
+// this will work with either , or | as a delimiter, stack 49 onwards are a different format to pre 49 reels.
 
-// 1..98
+// 1..98, order doesn't matter, can skip
 string NSL_partList[] = {
     //stack 1,isn't here, starts from 1.
-//#Feeder,Feeder ID,Type,Nozzle,X,Y,Angle,Footprint,Value,Pick height,Pick delay,Placement height,Placement delay,Vacuum detection,Vacuum value,Vision alignment,Speed,
     "stack,2,0,123,409.87,101.73,90.00,0805,2.2nF,0.50,0,0.50,0,No,-40,1,30,4,50,80,No,No,-40,-40,-40,-40,",
     "stack,3,0,1,409.85,115.04,90.00,0805,10uF,0.50,0,1.00,0,No,-40,1,30,4,50,80,No,No,-40,-40,-40,-40,",
     "stack,4,0,1,409.95,128.58,90.00,0805,1.0uF,0.50,0,1.00,0,No,-40,1,30,4,50,80,No,No,-40,-40,-40,-40,",
@@ -1202,7 +1201,7 @@ void ReelPage ( int reeloffset )
                                     }
 
                                     //dlgSpinBox ( ReelHead[reelNumber], 1, 4 );
-                                    dlgComboBox ( nozzleCombo, ReelHead[reelNumber] ) dlgRedisplay();
+                                    dlgComboBox ( nozzleCombo, ReelHead[reelNumber] ) ;
                                 }
 
                                 // dlgStretch ( 1 );
