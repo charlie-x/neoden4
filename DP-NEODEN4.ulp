@@ -63,7 +63,8 @@ string Help1 = "<p><strong>Reel Name</strong> - Enter the Your Assigned name to 
                "<br><strong>Rotation Correction</strong> - If Parts' placement rotation is off, select rotation value to add. a <strong>180</strong> degree rotation rotates the reel's part by .</p>";
 string Help2 = "<p><strong>NullSpaceLabs.com's Standard Stack</strong> - This button loads the NullSpaceLabs.com' Standard Stack><BR><strong>Load User's Standard Stack</strong> - Load a predefined stack <strong>Save User's Standard Stack</strong> - Save a stack for loading later<BR>"
                "<br><strong>Accept</strong> - Accept the displayed values. <strong>Cancel</strong> - Reject the changed values. "
-               "<br>If there are reel assignments under the tabs<strong> PCB Top</strong> and<strong> PCB Bottom</strong>, it will be updated, as well as the values  in <strong>Height</strong> and <strong>Rate</strong>.</p>";
+               "<br>If there are reel assignments under the tabs<strong> PCB Top</strong> and<strong> PCB Bottom</strong>, it will be updated, as well as the values  in <strong>Height</strong> and <strong>Rate</strong>.</p>"
+               "<p>Reels with 0,0 Pick XY, blank eel Name (or a single space) will not be exported";
 
 
 // DP's Common Parts offset use '|' as separator
@@ -157,20 +158,20 @@ string NSL_partList[] = {
     "stack,82,1,1,150.00,330.00,0.00,TQFP44,CY8C4245,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,0.00,1,1,No,No,-40,-40,-40,-40,",
     "stack,83,1,1,150.00,340.00,0.00,TPTP10R,TP10R,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,0.00,1,1,No,No,-40,-40,-40,-40,",
     "stack,84,1,1,150.00,350.00,0.00,SPH0645LM4H,MIC_I2S_SPH0645,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,0.00,1,1,No,No,-40,-40,-40,-40,",
-    "stack,85,1,1,150.00,360.00,0.00,SOIC127P600X175-8N,IRF9358TRPBF,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,86,1,1,150.00,370.00,0.00,SOT23-5,M74VHC1GT125DF2G,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,87,1,1,150.00,380.00,0.00,SLOT,SLOT,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,88,1,1,150.00,390.00,0.00,SOIC127P600X170-9N,DIO7320,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,89,1,1,150.00,400.00,0.00,,SC70-6,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,90,1,1,132.64,217.56,0.00,QFN40P300X300X105-25N,MPU-9250,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,91,1,1,121.00,217.52,0.00,QFN24,IP5209,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,92,1,1,97.88,211.92,0.00,ESP-WROOM-32,ESP-WROOM-32,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,93,1,4,159.49,227.05,0.00,SPST_SMT_19192,BM06B-SRSS-TB,1.10,0,1.40,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,94,1,4,146.93,227.88,0.00,1206,LED RED,1.00,0,1.50,1,No,-40,1,20,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,95,1,1,134.39,227.57,0.00,24X16_RGB_LED5MM_RGB_EDGE,WS2812B,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,96,1,4,120.06,227.38,0.00,QFN20,FT231XQ,0.70,0,2.70,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,97,1,4,107.73,227.09,0.00,FIDUCIAL_1MM,FIDUCIAL,0.70,0,2.70,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,",
-    "stack,98,1,1,92.27,226.88,0.00,0805,couple pf -DNP,-1.00,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,-40,No,No,-40,-40,-40,-40,"
+    "stack,85,1,1,150.00,360.00,0.00,SOIC127P600X175-8N,IRF9358TRPBF,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,86,1,1,150.00,370.00,0.00,SOT23-5,M74VHC1GT125DF2G,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,87,1,1,150.00,380.00,0.00,SLOT,SLOT,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,88,1,1,150.00,390.00,0.00,SOIC127P600X170-9N,DIO7320,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,89,1,1,150.00,400.00,0.00,,SC70-6,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,90,1,1,132.64,217.56,0.00,QFN40P300X300X105-25N,MPU-9250,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,91,1,1,121.00,217.52,0.00,QFN24,IP5209,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,92,1,1,97.88,211.92,0.00,ESP-WROOM-32,ESP-WROOM-32,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,93,1,4,159.49,227.05,0.00,SPST_SMT_19192,BM06B-SRSS-TB,1.10,0,1.40,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,94,1,4,146.93,227.88,0.00,1206,LED RED,1.00,0,1.50,1,No,-40,1,20,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,95,1,1,134.39,227.57,0.00,24X16_RGB_LED5MM_RGB_EDGE,WS2812B,0.50,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,96,1,4,120.06,227.38,0.00,QFN20,FT231XQ,0.70,0,2.70,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,97,1,4,107.73,227.09,0.00,FIDUCIAL_1MM,FIDUCIAL,0.70,0,2.70,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,",
+    "stack,98,1,1,92.27,226.88,0.00,0805,couple pf -DNP,-1.00,0,0.00,0,No,-40,1,30,1,1,80.00,1.00,1,1,No,No,-40,-40,-40,-40,"
 };
 
 int  DP_stack_Loaded = 0;    // flag 1 if dp stack is loaded
