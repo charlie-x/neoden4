@@ -45,7 +45,9 @@ video version of the text is here https://youtu.be/oF4B8zPS2p8
  
  user stacks work correctly
  
- the special feeder flag i had as > 48 index = 1 but that crashed 4.1.2 B3 so they are always set to 0 currently
+ special feeders are on again, you may need to use V4.1.3 B9 if stack doesn't load correctly
+ 
+ nearly all parameters are configurable now
  
  
 @todo
