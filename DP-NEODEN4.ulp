@@ -1151,6 +1151,12 @@ void ReelPage ( int reeloffset )
                                 else
                                 {
                                     dlgSpacing ( 3 );
+
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Reel Assignments" );
+
+                                    }
+
                                     dlgLabel ( "Reel # " + Num2Str ( reelNumber ) );
                                 }
 
@@ -1168,6 +1174,11 @@ void ReelPage ( int reeloffset )
 
                                 } else
                                 {
+
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Nozzle" );
+
+                                    }
 
                                     //dlgSpinBox ( ReelHead[reelNumber], 1, 4 );
                                     dlgComboBox ( nozzleCombo, ReelHead[reelNumber] ) dlgRedisplay();
@@ -1187,6 +1198,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Reel Name" );
+
+                                    }
+
                                     dlgStringEdit ( Reel[reelNumber] );
 
 
@@ -1206,6 +1222,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Reel Footprint" );
+
+                                    }
+
                                     dlgStringEdit ( ReelFootPrint[reelNumber] );
 
 
@@ -1225,6 +1246,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Pick X" );
+
+                                    }
+
                                     dlgRealEdit ( ReelOffSetX[reelNumber] );
 
 
@@ -1244,6 +1270,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Pick Y" );
+
+                                    }
+
                                     dlgRealEdit ( ReelOffSetY[reelNumber] );
 
 
@@ -1263,6 +1294,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Pick Height" );
+
+                                    }
+
                                     dlgRealEdit ( ReelHeight[reelNumber], 0.00, 3 );
 
                                 }
@@ -1281,6 +1317,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Pick Angle" );
+
+                                    }
+
                                     dlgRealEdit ( ReelPickAngle[reelNumber] );
 
 
@@ -1302,6 +1343,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Pick Delay" );
+
+                                    }
+
                                     dlgIntEdit ( ReelPickDelay[reelNumber] );
 
 
@@ -1322,6 +1368,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Place Height" );
+
+                                    }
+
                                     dlgRealEdit ( ReelPlaceHeight[reelNumber] );
 
 
@@ -1362,6 +1413,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Move Speed" );
+
+                                    }
+
                                     dlgIntEdit ( ReelMoveSpeed[reelNumber] );
 
 
@@ -1382,6 +1438,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Vision" );
+
+                                    }
+
                                     dlgCheckBox ( "", ReelVisionAlignment[reelNumber] );
 
                                 }
@@ -1400,6 +1461,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Detect" );
+
+                                    }
+
                                     dlgCheckBox ( "", ReelVacuumDetection[reelNumber] );
 
                                 }
@@ -1420,6 +1486,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Skip" );
+
+                                    }
+
                                     dlgCheckBox ( "", ReelSkip[reelNumber] );
 
                                 }
@@ -1438,6 +1509,11 @@ void ReelPage ( int reeloffset )
 
                                 else
                                 {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "SizeCorrect" );
+
+                                    }
+
                                     dlgCheckBox ( "", ReelSizeCorrect[reelNumber] );
 
                                 }
