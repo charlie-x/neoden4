@@ -101,6 +101,8 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
 // Placement delay, Vacuum test, Vacuum value, Vision alignment, Speed,
 // SkipSize testFlash typeLighting brightness, , , , ,
 
+//stack,98,1,1,92.27,226.88,0.00,0805,special/special,-1.00,0,0.00,0,No,-40,1,50,9,8,162.27,206.88,3,4,Yes,Yes,-40,-45,-50,-55,
+//stack,98,1,1,92.27,226.88,0.00,0805,special/special,-1.00,0,0.00,0,No,-40,1,50,9,8,162.27,206.88,3,4, No,Yes,-40,-45,-50,-55,
 
 ///////////////////////////////////////////////
 // normal feeder setup
@@ -120,8 +122,6 @@ string DP_Packages[] = {"0402|0.00|0.05|0402",
 //continued, differences are here
 // columns, rows, right top x , right top y, startx, starty,   skip, size correct,  thresholds for nozzles 1-4
 // 9,        8,   162.27,      206.88,         3,       4,        No,      No,       -40,-40,-40,-40,
-
-
 
 // you  can copy and paste a neoden4 stack in here, just add a " at the start and ", at the end, on the last line at the end use " instead of ",
 // this will work with either , or | as a delimiter
@@ -370,6 +370,13 @@ string RotationOffset[];    // 0,90,180,270 - adds angle
 
 string FeedRates[]; // 0 - 100, steps of 10
 int FeedRatesSelected[];   // 0-9
+
+string ComboThresholds[] = { "-10", "-15", "-20", "-25", "-30", "-35", "-40", "-45", "-50", "-55", "-60", "-65", "-70", "-75", "-80", "-85", "-90", "-95", "-100"};
+
+int Nozzle1Thresholds[] ; //-10 to -100 in steps of 5
+int Nozzle2Thresholds[]; //-10 to -100 in steps of 5
+int Nozzle3Thresholds[]; //-10 to -100 in steps of 5
+int Nozzle4Thresholds[]; //-10 to -100 in steps of 5
 
 int xmax = -2147483648;
 int xmin = 2147483647;
@@ -635,7 +642,7 @@ void write_reel_line ( int j )
         // 4,          80,            50,             No,        No,             -40, -40, -40, -40,
 
 
-        sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%d|%s|%s\n",
+        sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%d|%s|%s|%d|%d|%d|%d\n",
                   j,									//%d 1
                   0,									//%d 2
                   ReelHead[j],							//%d 3
@@ -657,7 +664,13 @@ void write_reel_line ( int j )
                   ReelFeedStrength[j],					//%d
                   ReelPeelStrength[j],					//%d
                   ReelSkip[j] ? "YES" : "NO",			//%s
-                  ReelSizeCorrect[j] ? "YES" : "NO"		//%s
+                  ReelSizeCorrect[j] ? "YES" : "NO",	//%s
+
+                  //thresholds
+                  Nozzle1Thresholds[j], //%d
+                  Nozzle2Thresholds[j], //%d
+                  Nozzle3Thresholds[j], //%d
+                  Nozzle4Thresholds[j] //%d
                 );
 
     } else {
@@ -673,7 +686,7 @@ void write_reel_line ( int j )
         // 9,        8,   162.27,      206.88,         3,       4,        No,      No,       -40,-40,-40,-40,
 
 
-        sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%.3f|%.3f|%d|%d\n",
+        sprintf ( str, "[REEL]|%d|%d|%d|%.2f|%.2f|%.2f|%s|%s|%.2f|%d|%.2f|%d|%s|%d|%d|%d|%d|%d|%.3f|%.3f|%d|%d|%s|%s|%d|%d|%d|%d\n",
                   j,									//%d 1
                   0,									//%d 2
                   ReelHead[j],							//%d 3
@@ -697,12 +710,23 @@ void write_reel_line ( int j )
                   trayRightTopX[j],						//%f
                   trayRightTopY[j],						//%f
                   trayStartX[j], 						//%d
-                  trayStartY[j]							//%d
+                  trayStartY[j],						//%d
+
+                  //restarts
+                  ReelSkip[j] ? "YES" : "NO",			//%s
+                  ReelSizeCorrect[j] ? "YES" : "NO",		//%s
+                  //thresholds
+                  Nozzle1Thresholds[j], //%d
+                  Nozzle2Thresholds[j], //%d
+                  Nozzle3Thresholds[j], //%d
+                  Nozzle4Thresholds[j] //%d
                 );
     }
 
     printf ( str );
 }
+
+
 
 // parses a neoden 4 style string for a REEL
 // reel index stored in file is +1 of actual index.
@@ -808,6 +832,11 @@ void parse_reel_line ( string reelString )
                 ReelSizeCorrect[i] = 0;
             }
 
+            Nozzle1Thresholds[i] = strtol ( alltrim ( a[22] ) );
+            Nozzle2Thresholds[i] = strtol ( alltrim ( a[23] ) );
+            Nozzle3Thresholds[i] = strtol ( alltrim ( a[24] ) );
+            Nozzle4Thresholds[i] = strtol ( alltrim ( a[25] ) );
+
         } else {
             // read special feeders.
 
@@ -822,6 +851,27 @@ void parse_reel_line ( string reelString )
             // (int)
             trayStartX[i] = strtol ( alltrim ( a[21] ) );
             trayStartY[i] = strtol ( alltrim ( a[22] ) );
+
+            // Skip (Yes/No)
+            if ( alltrim ( a[23] ) == "Yes" ) {
+                ReelSkip[i] = 1;
+
+            } else {
+                ReelSkip[i] = 0;
+            }
+
+            // Size Correct ( CheckMark Yes/No)
+            if ( alltrim ( a[24] ) == "Yes" ) {
+                ReelSizeCorrect[i] = 1;
+
+            } else {
+                ReelSizeCorrect[i] = 0;
+            }
+
+            Nozzle1Thresholds[i] = strtol ( alltrim ( a[25] ) );
+            Nozzle2Thresholds[i] = strtol ( alltrim ( a[26] ) );
+            Nozzle3Thresholds[i] = strtol ( alltrim ( a[27] ) );
+            Nozzle4Thresholds[i] = strtol ( alltrim ( a[28] ) );
         }
 
     }
@@ -910,6 +960,11 @@ void set_defaults()
     for ( int j = 0; j < MAXREEL; j++ ) {
 
         Reel[j] = "Reel " + Num2Str ( j );
+
+        Nozzle1Thresholds[i] = 6;
+        Nozzle2Thresholds[i] = 6;
+        Nozzle3Thresholds[i] = 6;
+        Nozzle4Thresholds[i] = 6;
 
         ReelPickDelay[i] = 0;
         ReelPeelStrength[i] = 80;
@@ -1340,12 +1395,50 @@ void ReelPage ( int reeloffset )
                             dlgVBoxLayout{
                                 if ( cellx == 0 )
                                 {
-                                    dlgLabel ( "Vac Detect" );
+                                    dlgLabel ( "Detect" );
                                 }
 
                                 else
                                 {
                                     dlgCheckBox ( "", ReelVacuumDetection[reelNumber] );
+
+                                }
+
+                                dlgStretch ( 1 );
+                            }
+
+                        }
+
+                        ////////////////
+
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Skip" );
+                                }
+
+                                else
+                                {
+                                    dlgCheckBox ( "", ReelSkip[reelNumber] );
+
+                                }
+
+                                dlgStretch ( 1 );
+                            }
+
+                        }
+                        ////////////////
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "SizeCorrect" );
+                                }
+
+                                else
+                                {
+                                    dlgCheckBox ( "", ReelSizeCorrect[reelNumber] );
 
                                 }
 
@@ -1395,43 +1488,6 @@ void ReelPage ( int reeloffset )
 
                             }
 
-                            ////////////////
-
-                            dlgCell ( cellx, celly++ ) {
-                                dlgVBoxLayout{
-                                    if ( cellx == 0 )
-                                    {
-                                        dlgLabel ( "Skip" );
-                                    }
-
-                                    else
-                                    {
-                                        dlgCheckBox ( "", ReelSkip[reelNumber] );
-
-                                    }
-
-                                    dlgStretch ( 1 );
-                                }
-
-                            }
-                            ////////////////
-                            dlgCell ( cellx, celly++ ) {
-                                dlgVBoxLayout{
-                                    if ( cellx == 0 )
-                                    {
-                                        dlgLabel ( "SizeCorrect" );
-                                    }
-
-                                    else
-                                    {
-                                        dlgCheckBox ( "", ReelSizeCorrect[reelNumber] );
-
-                                    }
-
-                                    dlgStretch ( 1 );
-                                }
-
-                            }
 
                             ////////////////// feed box
 
@@ -1467,6 +1523,11 @@ void ReelPage ( int reeloffset )
 
                                     else
                                     {
+                                        if ( reelNumber == SPECIALREEL ) {
+                                            dlgLabel ( "Columns" );
+
+                                        }
+
                                         dlgIntEdit ( trayColumns[reelNumber] );
 
 
@@ -1487,6 +1548,11 @@ void ReelPage ( int reeloffset )
 
                                     else
                                     {
+                                        if ( reelNumber == SPECIALREEL ) {
+                                            dlgLabel ( "Rows" );
+
+                                        }
+
                                         dlgIntEdit ( trayRows[reelNumber] );
 
 
@@ -1506,6 +1572,11 @@ void ReelPage ( int reeloffset )
 
                                     else
                                     {
+                                        if ( reelNumber == SPECIALREEL ) {
+                                            dlgLabel ( "Right Top X" );
+
+                                        }
+
                                         dlgRealEdit ( trayRightTopX[reelNumber] );
 
 
@@ -1525,6 +1596,11 @@ void ReelPage ( int reeloffset )
 
                                     else
                                     {
+                                        if ( reelNumber == SPECIALREEL ) {
+                                            dlgLabel ( "Right Top Y" );
+
+                                        }
+
                                         dlgRealEdit ( trayRightTopY[reelNumber] );
 
 
@@ -1544,6 +1620,11 @@ void ReelPage ( int reeloffset )
 
                                     else
                                     {
+                                        if ( reelNumber == SPECIALREEL ) {
+                                            dlgLabel ( "Start X" );
+
+                                        }
+
                                         dlgIntEdit ( trayStartX[reelNumber] );
 
 
@@ -1563,6 +1644,11 @@ void ReelPage ( int reeloffset )
 
                                     else
                                     {
+                                        if ( reelNumber == SPECIALREEL ) {
+                                            dlgLabel ( "Start Y" );
+
+                                        }
+
                                         dlgIntEdit ( trayStartY[reelNumber] );
 
 
@@ -1574,6 +1660,93 @@ void ReelPage ( int reeloffset )
                             }
                         }
 
+                        ///////////
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Noz 1 Thres" );
+
+                                } else
+                                {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Noz 1 Thres" );
+
+                                    }
+
+                                    {
+                                        dlgComboBox ( ComboThresholds, Nozzle1Thresholds[reelNumber] ) ;
+                                    }
+                                }
+
+                                // dlgStretch ( 1 );
+                            }
+
+                        }
+                        ///////////
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Noz 2 Thres" );
+
+                                } else
+                                {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Noz 2 Thres" );
+
+                                    }
+
+                                    //dlgSpinBox ( ReelHead[reelNumber], 1, 4 );
+                                    dlgComboBox ( ComboThresholds, Nozzle2Thresholds[reelNumber] ) ;
+                                }
+
+                                // dlgStretch ( 1 );
+                            }
+
+                        }
+                        ///////////
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Noz 3 Thres" );
+
+                                } else
+                                {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Noz 3 Thres" );
+
+                                    }
+
+                                    dlgComboBox ( ComboThresholds, Nozzle3Thresholds[reelNumber] ) ;
+                                }
+
+                                // dlgStretch ( 1 );
+                            }
+
+                        }
+                        ///////////
+                        dlgCell ( cellx, celly++ ) {
+                            dlgVBoxLayout{
+                                if ( cellx == 0 )
+                                {
+                                    dlgLabel ( "Noz 4 Thres" );
+
+                                } else
+                                {
+                                    if ( reelNumber == SPECIALREEL ) {
+                                        dlgLabel ( "Noz 4 Thres" );
+
+                                    }
+
+                                    dlgComboBox ( ComboThresholds, Nozzle4Thresholds[reelNumber] ) ;
+                                }
+
+                                // dlgStretch ( 1 );
+                            }
+
+                        }
 
                         dlgCell ( cellx, celly++ ) {
                             dlgVBoxLayout {
@@ -2891,7 +3064,6 @@ if ( project.board ) project.board ( B )
                     // converts to a number, since eagle combo boxes don't work without a first entry which we have as -
                     nozzleid = strtol ( nozzleCombo[ReelHead[j]] );
 
-                    // -40s at end are thresholds
                     printf (	"stack,%d,%d,%d," +
                                 "%.2f,%.2f,%.2f," +
                                 "%s,%s," +
@@ -2899,7 +3071,7 @@ if ( project.board ) project.board ( B )
                                 "%.2f,%d,%.2f,%d," +
                                 "%s,%d,%d," +
                                 "%d,%d,%d,%d,%s,%s," +
-                                "-40,-40,-40,-40,\n",
+                                "%s,%s,%s,%s,\n",
 
                                 j, id, nozzleid,
                                 ReelOffSetX[j], ReelOffSetY[j], ReelPickAngle[j],
@@ -2907,7 +3079,9 @@ if ( project.board ) project.board ( B )
 
                                 ReelHeight[j], ReelPickDelay[j], ReelPlaceHeight[j], ReelPlaceDelay[j],
                                 ReelVacuumDetection[j] ? "Yes" : "No",	ReelVacuumValue[j], ReelVisionAlignment[j],
-                                move_speed, ReelRate[j], ReelFeedStrength[j], ReelPeelStrength[j], ReelSkip[j] ? "Yes" : "No", ReelSizeCorrect[j] ? "Yes" : "No"
+                                move_speed, ReelRate[j], ReelFeedStrength[j], ReelPeelStrength[j], ReelSkip[j] ? "Yes" : "No", ReelSizeCorrect[j] ? "Yes" : "No",
+
+                                ComboThresholds[Nozzle1Thresholds[j]], ComboThresholds[Nozzle2Thresholds[j]], ComboThresholds[Nozzle3Thresholds[j]], ComboThresholds[Nozzle4Thresholds[j]]
                            );
                 }
 
