@@ -1142,7 +1142,7 @@ string Group_Parts ( string Enamex )
 
 void ReelPage ( int reeloffset )
 {
-    dlgRedisplay();
+
     board ( B ) {
         // 1. load default values if new
         // 2. Load save values if settings file exist
@@ -2925,18 +2925,16 @@ if ( project.board ) project.board ( B )
                                             switch ( MyLayer ) {
                                                 case 0:
                                                     dlgSpinBox ( CT_Ehead[cellx - 1 + TopAddLine[pagex]], 1, 4 );
-                                                    //dlgComboBox ( nozzleCombo, CT_Ehead[cellx - 1 + TopAddLine[pagex]] ) dlgRedisplay();
 
                                                     break;
 
                                                 case 1:
                                                     dlgSpinBox ( CB_Ehead[cellx - 1 + BottomAddLine[pagey]], 1, 4 );
-                                                    //dlgComboBox ( nozzleCombo, CB_Ehead[cellx - 1 + BottomAddLine[pagey]] ) dlgRedisplay();
                                                     break;
 
                                                 case 2:
-                                                    //dlgSpinBox ( CM_Ehead[cellx - 1 + MidAddLine[pagez]], 1, 4 );
-                                                    //dlgComboBox ( nozzleCombo, CM_Ehead[cellx - 1 + MidAddLine[pagez]] ) dlgRedisplay();
+                                                    dlgSpinBox ( CM_Ehead[cellx - 1 + MidAddLine[pagez]], 1, 4 );
+
                                                     break;
                                             }
                                         }
@@ -2963,17 +2961,14 @@ if ( project.board ) project.board ( B )
 
                                                 switch ( MyLayer ) {
                                                     case 0:
-                                                        //dlgRealEdit ( CT_Eheight[cellx - 1 + TopAddLine[pagex]], 0.00, 5.00 );
                                                         dlgLabel ( Num2StrF ( CT_Eheight[cellx - 1 + TopAddLine[pagex]] ) );
                                                         break;
 
                                                     case 1:
-                                                        //dlgRealEdit ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]], 0.00, 5.00 );
                                                         dlgLabel ( Num2StrF ( CB_Eheight[cellx - 1 + BottomAddLine[pagey]] ) );
                                                         break;
 
                                                     case 2:
-                                                        //dlgRealEdit ( CM_Eheight[cellx - 1 + MidAddLine[pagez]], 0.00, 5.00 );
                                                         dlgLabel ( Num2StrF ( CM_Eheight[cellx - 1 + MidAddLine[pagez]] ) );
                                                         break;
                                                 }
