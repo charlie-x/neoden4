@@ -911,6 +911,12 @@ void set_defaults()
 
         Reel[j] = "Reel " + Num2Str ( j );
 
+        ReelPickDelay[i] = 0;
+        ReelPeelStrength[i] = 80;
+        ReelFeedStrength[i] = 50;
+        ReelRate[i] = 4;
+
+
         // reel position defaults
         ReelOffSetX[j] = default_feeder_x ( j );
         ReelOffSetY[j] = default_feeder_y ( j );
