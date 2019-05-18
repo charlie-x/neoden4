@@ -547,13 +547,14 @@ real get_first_y()
 // check to see if its a fiducial, maybe we should test something longer
 int is_fiducial ( UL_ELEMENT E )
 {
+
     // does name contain FID
-    if ( strstr ( E.value, "FID" ) > 0 ) {
+    if ( strstr ( E.value, "FID" ) >= 0 ) {
         return 1;
     }
 
     // does value contain FID
-    if ( strstr ( E.name, "FID" ) > 0  ) {
+    if ( strstr ( E.name, "FID" ) >= 0  ) {
         return 1;
     }
 
@@ -2004,6 +2005,71 @@ void ReelPage ( int reeloffset )
     }
 }
 
+real getBoardWidth() {
+	real width = 0;
+	board(B) {
+     	char firstPoint = 'y';
+     	real x1;
+     	real y1;
+     	real x2;
+     	real y2;
+		B.wires(W) {
+			if (W.layer == LAYER_DIMENSION) {
+				// Wire is on dimension layer
+				real wx1 = u2mm(W.x1);
+				real wy1 = u2mm(W.y1);
+				real wx2 = u2mm(W.x2);
+				real wy2 = u2mm(W.y2);
+
+				// dlgMessageBox( "X1: " + Num2StrF(wx1) + ", Y1: " + Num2StrF(wy1) + ", X2: " + Num2StrF(wx2) + ", Y2: " + Num2StrF(wy2), "!OK" );
+				// Start point of wire
+				if(firstPoint == 'y') {
+					firstPoint = 'n';
+					x1 = wx1;
+					x2 = wx1;
+					y1 = wy1;
+					y2 = wy2;
+				} else {
+					if(wx1 > x1) {
+						x1 = wx1;
+					}
+					if(wx1 < x2) {
+						x2 = wx1;
+					}
+					if(wy1 > y1) {
+						y1 = wy1;
+					}
+					if(wy1 < y2) {
+						y2 = wy1;
+					}
+				}
+
+				// End point of wire
+				if(wx2 > x1) {
+					x1 = wx2;
+				}
+				if(wx2 < x2) {
+					x2 = wx2;
+				}
+				if(wy2 > y1) {
+					y1 = wy2;
+				}
+				if(wy2 < y2) {
+					y2 = wy2;
+				}
+
+			}
+	   	}
+
+	   	if ( abs(x1 - x2) > width ) width = abs(x1 - x2);
+	   	// real height = abs(y1 - y2);
+		// real dim = width * height;
+	}
+	// dlgMessageBox( "board width: " + Num2StrF( width ), "!OK" );
+	return width;
+}
+
+
 // Initialize variables
 Reel[0] = "--------";
 ReelNum[0] = "--";
@@ -3076,6 +3142,7 @@ if ( project.board ) project.board ( B )
         string csvfilename;
 
         int csv;
+		real boardWidth = getBoardWidth();
 
         for ( csv = 0; csv < 2 ; csv++ ) {
             if ( csv == 0 ) {
@@ -3463,13 +3530,24 @@ if ( project.board ) project.board ( B )
 
 
                         if ( stack != 99 ) {
-                            printf ( "comp,%d,%d,%s,%s,%s,%.2f,%.2f,%.0f,%s,\n",
-                                     stack + 1, head, E.name, E.value, E.package.name,
-                                     u2mm ( ( xmin + xmax ) / 2 ) + board_offset_x,
-                                     u2mm ( ( ymin + ymax ) / 2 ) + board_offset_y,
-                                     angle,
-                                     skip ? "Yes" : "No"
-                                   );
+							if ( csv == 0 ) {
+								printf ( "comp,%d,%d,%s,%s,%s,%.2f,%.2f,%.0f,%s,\n",
+										stack + 1, head, E.name, E.value, E.package.name,
+										u2mm ( ( xmin + xmax ) / 2 ) + board_offset_x,
+										u2mm ( ( ymin + ymax ) / 2 ) + board_offset_y,
+										angle,
+										skip ? "Yes" : "No"
+									);
+							}
+							else {
+								printf ( "comp,%d,%d,%s,%s,%s,%.2f,%.2f,%.0f,%s,\n",
+										stack + 1, head, E.name, E.value, E.package.name,
+										boardWidth - u2mm ( ( xmin + xmax ) / 2 ) + board_offset_x,
+										u2mm ( ( ymin + ymax ) / 2 ) + board_offset_y,
+										angle,
+										skip ? "Yes" : "No"
+									);
+							}
                         }
 
                         else {
