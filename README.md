@@ -49,6 +49,12 @@ video version of the text is here https://youtu.be/oF4B8zPS2p8
  
  nearly all parameters are configurable now
  
+ From @HolliM
+ - A fix so that fiducials are found even if the name or value starts with the letters "FID". I did however not distinguish between top/bottom side. The output always contains both types, but they are easy to delete in Neoden4 software.
+ 
+ - Code to determine the width of the board plus calculating bottom coordinates, so that flipping the board on the Y axis to do bottom side will still have correct (and mirrored) coordinates.
+ 
+ 
  
 @todo
  bug test
