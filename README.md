@@ -58,3 +58,4 @@ video version of the text is here https://youtu.be/oF4B8zPS2p8
  
 @todo
  bug test
+ fix % in reel names breaking the script ( possibly other places too ) 
